@@ -1,10 +1,11 @@
-"use client";
+'use client';
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Maximize, Info } from "lucide-react";
-import { useState } from "react";
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Maximize, Info } from 'lucide-react';
+import { useState } from 'react';
+import Link from 'next/link';
 
 const inventory = [
   {
@@ -155,9 +156,11 @@ export function InventoryGrid() {
               </div>
             </div>
 
-            <Button className="w-full mt-6 bg-slate-800 hover:bg-slate-900 text-white">
-              View Details
-            </Button>
+            <Link href={`/inventory/${item.id}`}>
+              <Button className="w-full mt-6 bg-slate-800 hover:bg-slate-900 text-white">
+                View Details
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       ))}
