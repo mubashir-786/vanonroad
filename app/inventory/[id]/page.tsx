@@ -2,6 +2,16 @@ import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { InventoryDetails } from '@/components/inventory/inventory-details';
 
+export async function generateStaticParams() {
+  // Return an array of objects with the 'id' parameter
+  // This is a basic example - you would typically fetch this from your data source
+  return [
+    { id: '1' },
+    { id: '2' },
+    { id: '3' }
+  ];
+}
+
 export default function InventoryDetailsPage({ params }: { params: { id: string } }) {
   return (
     <>
