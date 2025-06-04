@@ -1,8 +1,8 @@
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { InventoryList } from '@/components/admin/inventory-list';
+import { InventoryForm } from '@/components/admin/inventory-form';
 
-export default function AdminPage() {
+export default function AddInventoryPage() {
   return (
     <>
       <Navbar />
@@ -10,15 +10,15 @@ export default function AdminPage() {
         <div className="container mx-auto px-4 py-12">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold font-playfair mb-4">
-              Admin <span className="text-amber-500">Dashboard</span>
+              Add New <span className="text-amber-500">Inventory</span>
             </h1>
             <p className="text-slate-600 dark:text-slate-400 max-w-3xl mx-auto text-lg">
-              Manage your inventory listings
+              Add a new vehicle to your inventory
             </p>
           </div>
           
-          <div className="max-w-6xl mx-auto">
-            <InventoryList />
+          <div className="max-w-3xl mx-auto">
+            <InventoryForm />
           </div>
         </div>
       </main>
