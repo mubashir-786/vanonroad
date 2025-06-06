@@ -8,11 +8,6 @@ import { Calendar, MapPin, Users, Phone, Mail, ArrowLeft, Loader2, X, ChevronLef
 import Link from 'next/link';
 import { getInventoryItem, InventoryItem } from '@/lib/api/inventory';
 import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -304,9 +299,9 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
       </div>
 
       {/* Fullscreen Image Modal */}
-      <Dialog open={isFullscreenOpen} onOpenChange={setIsFullscreenOpen}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none">
-          <div className="relative w-full h-[90vh] flex items-center justify-center">
+      {isFullscreenOpen && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
+          <div className="relative w-full h-full flex items-center justify-center">
             {/* Close Button */}
             <Button
               variant="ghost"
@@ -326,7 +321,7 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
             <img
               src={images[fullscreenImageIndex]}
               alt={`${item.title} - Image ${fullscreenImageIndex + 1}`}
-              className="max-w-full max-h-full object-contain"
+              className="max-w-[90vw] max-h-[90vh] object-contain"
             />
 
             {/* Navigation Arrows */}
@@ -379,8 +374,8 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
               Use arrow keys or click arrows to navigate • Press ESC to close
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 }

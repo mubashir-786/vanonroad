@@ -54,19 +54,19 @@ export default function InventoryPage() {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link href="/">Home</Link>
+                    <Link href="/" className="text-slate-900 dark:text-slate-100">Home</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Inventory</BreadcrumbPage>
+                  <BreadcrumbPage className="text-slate-900 dark:text-slate-100">Inventory</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
 
             {/* Page Header */}
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold font-playfair mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold font-playfair mb-4 text-slate-900 dark:text-slate-100">
                 Luxury <span className="text-amber-500">Motorhomes</span> For Sale
               </h1>
               <p className="text-slate-600 dark:text-slate-400 max-w-3xl mx-auto text-lg">
