@@ -45,37 +45,43 @@ export default function InventoryPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-slate-50 dark:bg-slate-900 pt-20">
-        <div className="container mx-auto px-4 py-8">
-          {/* Breadcrumb Navigation */}
-          <Breadcrumb className="mb-8">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Inventory</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        <div className="pt-20 pb-8">
+          <div className="container mx-auto px-4">
+            {/* Breadcrumb Navigation */}
+            <Breadcrumb className="mb-8">
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link href="/">Home</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Inventory</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
 
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Luxury <span className="text-amber-500">Motorhomes</span> For Sale
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 max-w-3xl mx-auto text-lg">
-              Browse our extensive collection of premium motorhomes, each crafted to deliver
-              the ultimate luxury travel experience.
-            </p>
-          </div>
+            {/* Page Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold font-playfair mb-4">
+                Luxury <span className="text-amber-500">Motorhomes</span> For Sale
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 max-w-3xl mx-auto text-lg">
+                Browse our extensive collection of premium motorhomes, each crafted to deliver
+                the ultimate luxury travel experience.
+              </p>
+            </div>
 
-          <div className="grid lg:grid-cols-4 gap-8">
-            <InventoryFilters onFiltersChange={setFilters} initialFilters={filters} />
-            <div className="lg:col-span-3">
-              <InventoryGrid filters={filters} />
+            {/* Content Grid */}
+            <div className="grid lg:grid-cols-4 gap-8">
+              <div className="lg:col-span-1">
+                <InventoryFilters onFiltersChange={setFilters} initialFilters={filters} />
+              </div>
+              <div className="lg:col-span-3">
+                <InventoryGrid filters={filters} />
+              </div>
             </div>
           </div>
         </div>
