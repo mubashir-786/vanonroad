@@ -49,7 +49,6 @@ export function Navbar() {
     { name: "Home", href: "/" },
     { name: "Inventory", href: "/inventory" },
     { name: "About", href: "#about" },
-    { name: "Services", href: "#services" },
     { name: "Testimonials", href: "#testimonials" },
     { name: "Contact", href: "#contact" }
   ];
@@ -61,9 +60,9 @@ export function Navbar() {
     )}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          {/* Logo */}
+          {/* Logo - Made bigger */}
           <Link href="/" className="flex items-center">
-            <div className="w-32 h-12 relative">
+            <div className="w-40 h-16 relative">
               <Image
                 src="/van_on_road_logo.svg"
                 alt="Van On Road"
