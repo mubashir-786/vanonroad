@@ -3,10 +3,13 @@
 import { Button } from '@/components/ui/button';
 import { signOutAdmin } from '@/lib/auth';
 import { useAuth } from '@/contexts/auth-context';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, MessageSquare, Package } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function AdminHeader() {
   const { user } = useAuth();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     try {
@@ -27,6 +30,27 @@ export function AdminHeader() {
         </div>
         
         <div className="flex items-center gap-4">
+          <nav className="flex items-center gap-2">
+            <Link href="/admin">
+              <Button 
+                variant={pathname === '/admin' ? 'default' : 'ghost'} 
+                size="sm"
+              >
+                <Package className="mr-2 h-4 w-4" />
+                Inventory
+              </Button>
+            </Link>
+            <Link href="/admin/messages">
+              <Button 
+                variant={pathname === '/admin/messages' ? 'default' : 'ghost'} 
+                size="sm"
+              >
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Messages
+              </Button>
+            </Link>
+          </nav>
+          
           <div className="flex items-center gap-2 text-sm">
             <User className="h-4 w-4" />
             <span>{user?.email}</span>

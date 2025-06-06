@@ -58,11 +58,6 @@ export function Hero() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link href="#contact">
-              <Button size="lg" variant="outline" className="border-white text-white hover:text-slate-900 hover:bg-white/90 rounded-md">
-                Book a Showroom Visit
-              </Button>
-            </Link>
           </div>
         </div>
 

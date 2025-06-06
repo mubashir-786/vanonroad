@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Clock,
   Facebook,
@@ -11,10 +13,44 @@ import {
   MapPin,
   Phone,
   Twitter,
-  Youtube
+  Youtube,
+  Loader2
 } from "lucide-react";
+import { createContactMessage } from "@/lib/api/contact";
 
 export function ContactSection() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      await createContactMessage(formData);
+      setSuccess('Message sent successfully! We will get back to you soon.');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error: any) {
+      setError(error.message || 'Failed to send message. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section id="contact" className="py-24 bg-slate-100 dark:bg-slate-900">
       <div className="container mx-auto px-4">
@@ -33,7 +69,19 @@ export function ContactSection() {
           <div className="bg-white dark:bg-slate-800 p-8 rounded-lg shadow-md">
             <h3 className="text-2xl font-bold mb-6 font-playfair">Send Us a Message</h3>
 
-            <form className="space-y-5">
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {success && (
+              <Alert className="mb-6 border-green-200 bg-green-50 text-green-800">
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid sm:grid-cols-2 gap-5">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium mb-2">
@@ -41,8 +89,13 @@ export function ContactSection() {
                   </label>
                   <Input
                     id="name"
+                    name="name"
                     type="text"
                     placeholder="John Doe"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
                     className="w-full"
                   />
                 </div>
@@ -53,8 +106,13 @@ export function ContactSection() {
                   </label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
                     placeholder="john@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
                     className="w-full"
                   />
                 </div>
@@ -66,8 +124,13 @@ export function ContactSection() {
                 </label>
                 <Input
                   id="subject"
+                  name="subject"
                   type="text"
                   placeholder="How can we help you?"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
                   className="w-full"
                 />
               </div>
@@ -78,13 +141,29 @@ export function ContactSection() {
                 </label>
                 <Textarea
                   id="message"
+                  name="message"
                   placeholder="Tell us about your requirements..."
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
                   className="w-full min-h-[150px]"
                 />
               </div>
 
-              <Button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-white">
-                Send Message
+              <Button 
+                type="submit" 
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  'Send Message'
+                )}
               </Button>
             </form>
           </div>

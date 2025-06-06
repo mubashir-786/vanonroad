@@ -7,6 +7,15 @@ import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { InventoryFilters as IInventoryFilters } from '@/lib/api/inventory';
 import { useSearchParams } from 'next/navigation';
+import { 
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import Link from 'next/link';
 
 export default function InventoryPage() {
   const searchParams = useSearchParams();
@@ -37,7 +46,22 @@ export default function InventoryPage() {
     <>
       <Navbar />
       <main className="min-h-screen bg-slate-50 dark:bg-slate-900 pt-20">
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 py-8">
+          {/* Breadcrumb Navigation */}
+          <Breadcrumb className="mb-8">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Inventory</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Luxury <span className="text-amber-500">Motorhomes</span> For Sale
