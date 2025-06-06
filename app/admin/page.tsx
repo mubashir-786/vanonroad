@@ -1,11 +1,50 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { AuthGuard } from '@/components/admin/auth-guard';
 import { AdminLayout } from '@/components/admin/admin-layout';
-import { InventoryList } from '@/components/admin/inventory-list';
 import { Button } from '@/components/ui/button';
 import { Plus, BarChart3, Package, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
+import { getInventoryItems } from '@/lib/api/inventory';
+import { getContactMessages } from '@/lib/api/contact';
 
 export default function AdminPage() {
+  const [stats, setStats] = useState({
+    totalInventory: 0,
+    unreadMessages: 0,
+    availableUnits: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    try {
+      setLoading(true);
+      
+      // Load inventory stats
+      const { items } = await getInventoryItems();
+      const availableItems = items.filter(item => item.status === 'available');
+      
+      // Load message stats
+      const messages = await getContactMessages();
+      const unreadMessages = messages.filter(msg => msg.status === 'unread');
+      
+      setStats({
+        totalInventory: items.length,
+        unreadMessages: unreadMessages.length,
+        availableUnits: availableItems.length
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthGuard>
       <AdminLayout>
@@ -30,7 +69,7 @@ export default function AdminPage() {
                     Total Inventory
                   </p>
                   <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                    -
+                    {loading ? '-' : stats.totalInventory}
                   </p>
                 </div>
               </div>
@@ -44,7 +83,7 @@ export default function AdminPage() {
                     Unread Messages
                   </p>
                   <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                    -
+                    {loading ? '-' : stats.unreadMessages}
                   </p>
                 </div>
               </div>
@@ -58,7 +97,7 @@ export default function AdminPage() {
                     Available Units
                   </p>
                   <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                    -
+                    {loading ? '-' : stats.availableUnits}
                   </p>
                 </div>
               </div>
@@ -75,6 +114,12 @@ export default function AdminPage() {
                   Add New Vehicle
                 </Button>
               </Link>
+              <Link href="/admin/inventory">
+                <Button variant="outline">
+                  <Package className="mr-2 h-4 w-4" />
+                  Manage Inventory
+                </Button>
+              </Link>
               <Link href="/admin/messages">
                 <Button variant="outline">
                   <MessageSquare className="mr-2 h-4 w-4" />
@@ -89,10 +134,37 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Inventory List */}
+          {/* Recent Activity */}
           <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border">
-            <h2 className="text-xl font-semibold mb-6">Recent Inventory</h2>
-            <InventoryList />
+            <h2 className="text-xl font-semibold mb-4">Overview</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-medium mb-2">Inventory Status</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Available:</span>
+                    <span className="font-medium text-green-600">{loading ? '-' : stats.availableUnits}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Units:</span>
+                    <span className="font-medium">{loading ? '-' : stats.totalInventory}</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Messages</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Unread:</span>
+                    <span className="font-medium text-red-600">{loading ? '-' : stats.unreadMessages}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Needs Attention:</span>
+                    <span className="font-medium">{loading ? '-' : (stats.unreadMessages > 0 ? 'Yes' : 'No')}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </AdminLayout>

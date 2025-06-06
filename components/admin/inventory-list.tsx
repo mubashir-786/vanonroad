@@ -33,7 +33,17 @@ import {
 
 const ITEMS_PER_PAGE = 10;
 
-export function InventoryList() {
+interface InventoryListProps {
+  showAddButton?: boolean;
+  showPagination?: boolean;
+  maxItems?: number;
+}
+
+export function InventoryList({ 
+  showAddButton = true, 
+  showPagination = true, 
+  maxItems 
+}: InventoryListProps) {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [filteredInventory, setFilteredInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,10 +99,11 @@ export function InventoryList() {
   };
 
   // Pagination calculations
-  const totalPages = Math.ceil(filteredInventory.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentItems = filteredInventory.slice(startIndex, endIndex);
+  const itemsToShow = maxItems ? filteredInventory.slice(0, maxItems) : filteredInventory;
+  const totalPages = showPagination ? Math.ceil(filteredInventory.length / ITEMS_PER_PAGE) : 1;
+  const startIndex = showPagination ? (currentPage - 1) * ITEMS_PER_PAGE : 0;
+  const endIndex = showPagination ? startIndex + ITEMS_PER_PAGE : itemsToShow.length;
+  const currentItems = showPagination ? filteredInventory.slice(startIndex, endIndex) : itemsToShow;
 
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
@@ -118,12 +129,14 @@ export function InventoryList() {
             className="pl-10"
           />
         </div>
-        <Link href="/admin/add">
-          <Button className="bg-amber-500 hover:bg-amber-600">
-            <Plus className="mr-2 h-4 w-4" />
-            Add New Vehicle
-          </Button>
-        </Link>
+        {showAddButton && (
+          <Link href="/admin/add">
+            <Button className="bg-amber-500 hover:bg-amber-600">
+              <Plus className="mr-2 h-4 w-4" />
+              Add New Vehicle
+            </Button>
+          </Link>
+        )}
       </div>
 
       {error && (
@@ -220,7 +233,7 @@ export function InventoryList() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {showPagination && totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
             Showing {startIndex + 1} to {Math.min(endIndex, filteredInventory.length)} of {filteredInventory.length} results

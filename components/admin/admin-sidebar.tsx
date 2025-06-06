@@ -40,9 +40,9 @@ export function AdminSidebar() {
     },
     {
       name: 'Inventory',
-      href: '/admin',
+      href: '/admin/inventory',
       icon: Package,
-      current: pathname === '/admin'
+      current: pathname === '/admin/inventory' || pathname.startsWith('/admin/add') || pathname.startsWith('/admin/edit')
     },
     {
       name: 'Messages',
