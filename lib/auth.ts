@@ -13,31 +13,56 @@ export function isAdminEmail(email: string): boolean {
   return ADMIN_EMAILS.includes(email.toLowerCase());
 }
 
+// Supabase client setup
+let supabase: any = null;
+
+async function getSupabaseClient() {
+  if (supabase) return supabase;
+  
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Supabase configuration missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.');
+    }
+    
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+    return supabase;
+  } catch (error) {
+    console.error('Failed to initialize Supabase:', error);
+    throw error;
+  }
+}
+
 export async function signInAdmin(email: string, password: string): Promise<AuthUser> {
   if (typeof window === 'undefined') {
     throw new Error('Authentication only available on client side');
   }
 
   try {
-    const { signInWithEmailAndPassword } = await import('firebase/auth');
-    const { auth } = await import('@/lib/firebase');
+    const supabase = await getSupabaseClient();
     
-    if (!auth || typeof auth !== 'object') {
-      throw new Error('Firebase not properly initialized');
+    if (!isAdminEmail(email)) {
+      throw new Error('Access denied. Admin privileges required.');
     }
     
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     
-    if (!isAdminEmail(user.email || '')) {
-      const { signOut } = await import('firebase/auth');
-      await signOut(auth);
-      throw new Error('Access denied. Admin privileges required.');
+    if (error) throw error;
+    
+    if (!data.user) {
+      throw new Error('Authentication failed');
     }
 
     return {
-      uid: user.uid,
-      email: user.email,
+      uid: data.user.id,
+      email: data.user.email,
       isAdmin: true
     };
   } catch (error: any) {
@@ -51,14 +76,10 @@ export async function signOutAdmin(): Promise<void> {
   }
 
   try {
-    const { signOut } = await import('firebase/auth');
-    const { auth } = await import('@/lib/firebase');
+    const supabase = await getSupabaseClient();
+    const { error } = await supabase.auth.signOut();
     
-    if (!auth || typeof auth !== 'object') {
-      throw new Error('Firebase not properly initialized');
-    }
-    
-    await signOut(auth);
+    if (error) throw error;
   } catch (error: any) {
     throw new Error(error.message || 'Sign out failed');
   }
@@ -70,34 +91,27 @@ export function onAuthStateChange(callback: (user: AuthUser | null) => void): ()
     return () => {};
   }
 
-  try {
-    import('firebase/auth').then(({ onAuthStateChanged }) => {
-      import('@/lib/firebase').then(({ auth }) => {
-        if (!auth || typeof auth !== 'object') {
-          callback(null);
-          return;
-        }
-        
-        return onAuthStateChanged(auth, (user: any) => {
-          if (user && isAdminEmail(user.email || '')) {
-            callback({
-              uid: user.uid,
-              email: user.email,
-              isAdmin: true
-            });
-          } else {
-            callback(null);
-          }
+  let unsubscribe: (() => void) | null = null;
+
+  getSupabaseClient().then((supabase) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
+      if (session?.user && isAdminEmail(session.user.email || '')) {
+        callback({
+          uid: session.user.id,
+          email: session.user.email,
+          isAdmin: true
         });
-      });
-    }).catch(() => {
-      callback(null);
+      } else {
+        callback(null);
+      }
     });
     
-    return () => {};
-  } catch (error) {
-    console.warn('Auth state change listener failed:', error);
+    unsubscribe = () => subscription.unsubscribe();
+  }).catch(() => {
     callback(null);
-    return () => {};
-  }
+  });
+  
+  return () => {
+    if (unsubscribe) unsubscribe();
+  };
 }
