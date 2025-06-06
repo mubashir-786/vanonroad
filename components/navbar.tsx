@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -6,10 +6,13 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter, usePathname } from "next/navigation";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +26,24 @@ export function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleNavClick = (href: string) => {
+    setIsOpen(false);
+    
+    // Check if it's an anchor link
+    if (href.startsWith('#')) {
+      // If we're not on the home page, navigate to home first then scroll
+      if (pathname !== '/') {
+        router.push(`/${href}`);
+      } else {
+        // If we're on home page, just scroll to the section
+        const element = document.querySelector(href);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+  };
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -56,13 +77,23 @@ export function Navbar() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="font-medium text-slate-900 dark:text-slate-100 hover:text-amber-500 transition-colors"
-              >
-                {link.name}
-              </Link>
+              <div key={link.name}>
+                {link.href.startsWith('#') ? (
+                  <button
+                    onClick={() => handleNavClick(link.href)}
+                    className="font-medium text-slate-900 dark:text-slate-100 hover:text-amber-500 transition-colors"
+                  >
+                    {link.name}
+                  </button>
+                ) : (
+                  <Link
+                    href={link.href}
+                    className="font-medium text-slate-900 dark:text-slate-100 hover:text-amber-500 transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                )}
+              </div>
             ))}
           </nav>
 
@@ -83,14 +114,24 @@ export function Navbar() {
       )}>
         <nav className="flex flex-col space-y-4 p-6">
           {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="text-slate-900 dark:text-slate-100 font-medium hover:text-amber-500"
-              onClick={() => setIsOpen(false)}
-            >
-              {link.name}
-            </Link>
+            <div key={link.name}>
+              {link.href.startsWith('#') ? (
+                <button
+                  onClick={() => handleNavClick(link.href)}
+                  className="text-slate-900 dark:text-slate-100 font-medium hover:text-amber-500 text-left"
+                >
+                  {link.name}
+                </button>
+              ) : (
+                <Link
+                  href={link.href}
+                  className="text-slate-900 dark:text-slate-100 font-medium hover:text-amber-500"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              )}
+            </div>
           ))}
         </nav>
       </div>
