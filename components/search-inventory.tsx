@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getMakes, Make } from "@/lib/api/makes";
 
 const priceRanges = [
   { label: "Any Price", value: "all" },
@@ -13,13 +14,6 @@ const priceRanges = [
   { label: "£100,000 - £150,000", value: "100000-150000" },
   { label: "£150,000 - £200,000", value: "150000-200000" },
   { label: "£200,000+", value: "200000-999999" }
-];
-
-const makes = [
-  { label: "All Makes", value: "all" },
-  { label: "Mercedes-Benz", value: "mercedes" },
-  { label: "Fiat", value: "fiat" },
-  { label: "Volkswagen", value: "volkswagen" }
 ];
 
 const berths = [
@@ -33,12 +27,30 @@ const berths = [
 
 export function SearchInventory() {
   const router = useRouter();
+  const [makes, setMakes] = useState<Make[]>([]);
+  const [makesLoading, setMakesLoading] = useState(true);
   const [searchParams, setSearchParams] = useState({
     keyword: "",
     priceRange: "all",
     make: "all",
     berths: "all"
   });
+
+  useEffect(() => {
+    loadMakes();
+  }, []);
+
+  const loadMakes = async () => {
+    try {
+      setMakesLoading(true);
+      const makesList = await getMakes();
+      setMakes(makesList);
+    } catch (error) {
+      console.error('Error loading makes:', error);
+    } finally {
+      setMakesLoading(false);
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,11 +131,16 @@ export function SearchInventory() {
                 <SelectValue placeholder="Make" />
               </SelectTrigger>
               <SelectContent>
-                {makes.map((make) => (
-                  <SelectItem key={make.value} value={make.value}>
-                    {make.label}
-                  </SelectItem>
-                ))}
+                <SelectItem value="all">All Makes</SelectItem>
+                {makesLoading ? (
+                  <SelectItem value="" disabled>Loading makes...</SelectItem>
+                ) : (
+                  makes.map((make) => (
+                    <SelectItem key={make.id} value={make.name}>
+                      {make.displayName}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>

@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Maximize, Info, Loader2 } from 'lucide-react';
+import { Info, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getInventoryItems, InventoryItem, InventoryFilters } from '@/lib/api/inventory';
@@ -96,11 +96,6 @@ export function InventoryGrid({ filters }: InventoryGridProps) {
                 {item.status === 'sold' ? 'Sold' : 'Reserved'}
               </Badge>
             )}
-            
-            <div className="absolute bottom-4 left-4 flex items-center text-white bg-slate-900/80 px-3 py-1 rounded">
-              <Maximize className="mr-1 h-4 w-4" />
-              <span className="text-sm">{item.length}m</span>
-            </div>
           </div>
 
           <CardContent className="flex-grow p-6">
