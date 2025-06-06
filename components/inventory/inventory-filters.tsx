@@ -14,6 +14,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useState, useEffect } from "react";
 import { InventoryFilters as IInventoryFilters } from "@/lib/api/inventory";
+import { getMakes, Make } from "@/lib/api/makes";
 
 interface InventoryFiltersProps {
   onFiltersChange: (filters: IInventoryFilters) => void;
@@ -26,6 +27,13 @@ export function InventoryFilters({ onFiltersChange, initialFilters = {} }: Inven
     initialFilters.maxPrice || 200000
   ]);
   const [filters, setFilters] = useState<IInventoryFilters>(initialFilters);
+  const [makes, setMakes] = useState<Make[]>([]);
+  const [makesLoading, setMakesLoading] = useState(true);
+
+  // Load makes
+  useEffect(() => {
+    loadMakes();
+  }, []);
 
   // Update filters when initialFilters change
   useEffect(() => {
@@ -35,6 +43,18 @@ export function InventoryFilters({ onFiltersChange, initialFilters = {} }: Inven
       initialFilters.maxPrice || 200000
     ]);
   }, [initialFilters]);
+
+  const loadMakes = async () => {
+    try {
+      setMakesLoading(true);
+      const makesList = await getMakes();
+      setMakes(makesList);
+    } catch (error) {
+      console.error('Error loading makes:', error);
+    } finally {
+      setMakesLoading(false);
+    }
+  };
 
   const handleFilterChange = (key: keyof IInventoryFilters, value: any) => {
     const newFilters = { ...filters, [key]: value };
@@ -115,9 +135,15 @@ export function InventoryFilters({ onFiltersChange, initialFilters = {} }: Inven
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Makes</SelectItem>
-              <SelectItem value="mercedes">Mercedes-Benz</SelectItem>
-              <SelectItem value="fiat">Fiat</SelectItem>
-              <SelectItem value="volkswagen">Volkswagen</SelectItem>
+              {makesLoading ? (
+                <SelectItem value="" disabled>Loading makes...</SelectItem>
+              ) : (
+                makes.map((make) => (
+                  <SelectItem key={make.id} value={make.name}>
+                    {make.displayName}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         </div>

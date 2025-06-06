@@ -24,6 +24,7 @@ import {
   getInventoryItem,
   InventoryItem 
 } from '@/lib/api/inventory';
+import { getMakes, Make } from '@/lib/api/makes';
 
 interface InventoryFormProps {
   id?: string;
@@ -35,7 +36,6 @@ interface InventoryFormData {
   price: number;
   location: string;
   berths: number;
-  length: number;
   make: string;
   model: string;
   year: number;
@@ -53,13 +53,14 @@ export function InventoryForm({ id }: InventoryFormProps) {
   const [images, setImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const [makes, setMakes] = useState<Make[]>([]);
+  const [makesLoading, setMakesLoading] = useState(true);
   
   const [formData, setFormData] = useState<InventoryFormData>({
     title: '',
     price: 0,
     location: '',
     berths: 2,
-    length: 0,
     make: '',
     model: '',
     year: new Date().getFullYear(),
@@ -67,12 +68,29 @@ export function InventoryForm({ id }: InventoryFormProps) {
     status: 'available'
   });
 
+  // Load makes
+  useEffect(() => {
+    loadMakes();
+  }, []);
+
   // Load existing data for edit mode
   useEffect(() => {
     if (isEditMode && id) {
       loadInventoryItem(id);
     }
   }, [isEditMode, id]);
+
+  const loadMakes = async () => {
+    try {
+      setMakesLoading(true);
+      const makesList = await getMakes();
+      setMakes(makesList);
+    } catch (error: any) {
+      console.error('Error loading makes:', error);
+    } finally {
+      setMakesLoading(false);
+    }
+  };
 
   const loadInventoryItem = async (itemId: string) => {
     try {
@@ -85,7 +103,6 @@ export function InventoryForm({ id }: InventoryFormProps) {
           price: item.price,
           location: item.location,
           berths: item.berths,
-          length: item.length,
           make: item.make,
           model: item.model,
           year: item.year,
@@ -115,7 +132,6 @@ export function InventoryForm({ id }: InventoryFormProps) {
           price: formData.price,
           location: formData.location,
           berths: formData.berths,
-          length: formData.length,
           make: formData.make,
           model: formData.model,
           year: formData.year,
@@ -137,7 +153,6 @@ export function InventoryForm({ id }: InventoryFormProps) {
           price: formData.price,
           location: formData.location,
           berths: formData.berths,
-          length: formData.length,
           make: formData.make,
           model: formData.model,
           year: formData.year,
@@ -152,7 +167,7 @@ export function InventoryForm({ id }: InventoryFormProps) {
 
       // Redirect after success
       setTimeout(() => {
-        router.push('/admin');
+        router.push('/admin/inventory');
       }, 2000);
     } catch (error: any) {
       setError(error.message || 'Failed to save vehicle');
@@ -165,7 +180,7 @@ export function InventoryForm({ id }: InventoryFormProps) {
     const { name, value } = e.target;
     setFormData(prev => ({ 
       ...prev, 
-      [name]: name === 'price' || name === 'berths' || name === 'length' || name === 'year' 
+      [name]: name === 'price' || name === 'berths' || name === 'year' 
         ? parseFloat(value) || 0 
         : value 
     }));
@@ -195,10 +210,10 @@ export function InventoryForm({ id }: InventoryFormProps) {
     <Card>
       <CardContent className="p-6">
         <div className="mb-6">
-          <Link href="/admin">
+          <Link href="/admin/inventory">
             <Button variant="ghost" className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
+              Back to Inventory
             </Button>
           </Link>
         </div>
@@ -268,9 +283,17 @@ export function InventoryForm({ id }: InventoryFormProps) {
                   <SelectValue placeholder="Select make" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mercedes">Mercedes-Benz</SelectItem>
-                  <SelectItem value="fiat">Fiat</SelectItem>
-                  <SelectItem value="volkswagen">Volkswagen</SelectItem>
+                  {makesLoading ? (
+                    <SelectItem value="" disabled>Loading makes...</SelectItem>
+                  ) : makes.length === 0 ? (
+                    <SelectItem value="" disabled>No makes available</SelectItem>
+                  ) : (
+                    makes.map((make) => (
+                      <SelectItem key={make.id} value={make.name}>
+                        {make.displayName}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -303,39 +326,22 @@ export function InventoryForm({ id }: InventoryFormProps) {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="berths">Berths</Label>
-              <Select
-                value={formData.berths.toString()}
-                onValueChange={(value) => handleSelectChange('berths', value)}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select berths" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2">2 Berths</SelectItem>
-                  <SelectItem value="4">4 Berths</SelectItem>
-                  <SelectItem value="6">6 Berths</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="length">Length (m)</Label>
-              <Input
-                id="length"
-                name="length"
-                type="number"
-                value={formData.length}
-                onChange={handleChange}
-                placeholder="8.5"
-                step="0.1"
-                min="0"
-                required
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="berths">Berths</Label>
+            <Select
+              value={formData.berths.toString()}
+              onValueChange={(value) => handleSelectChange('berths', value)}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select berths" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2">2 Berths</SelectItem>
+                <SelectItem value="4">4 Berths</SelectItem>
+                <SelectItem value="6">6 Berths</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

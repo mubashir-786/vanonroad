@@ -12,7 +12,8 @@ import {
   Menu, 
   X,
   Home,
-  LayoutDashboard
+  LayoutDashboard,
+  Settings
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -49,6 +50,12 @@ export function AdminSidebar() {
       href: '/admin/messages',
       icon: MessageSquare,
       current: pathname === '/admin/messages'
+    },
+    {
+      name: 'Vehicle Makes',
+      href: '/admin/makes',
+      icon: Settings,
+      current: pathname === '/admin/makes'
     }
   ];
 

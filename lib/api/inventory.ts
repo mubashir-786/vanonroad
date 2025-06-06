@@ -4,7 +4,6 @@ export interface InventoryItem {
   price: number;
   location: string;
   berths: number;
-  length: number;
   make: string;
   model: string;
   year: number;

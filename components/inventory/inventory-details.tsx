@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Ruler, Users, Phone, Mail, ArrowLeft, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Users, Phone, Mail, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { getInventoryItem, InventoryItem } from '@/lib/api/inventory';
 
@@ -129,10 +129,6 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
               <Users className="h-5 w-5 text-amber-500" />
               <span>{item.berths} Berths</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Ruler className="h-5 w-5 text-amber-500" />
-              <span>{item.length}m</span>
-            </div>
           </div>
 
           <Card>
@@ -159,10 +155,6 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
                 <div className="flex justify-between">
                   <span className="text-slate-600 dark:text-slate-400">Year</span>
                   <span className="font-medium">{item.year}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-slate-400">Length</span>
-                  <span className="font-medium">{item.length}m</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600 dark:text-slate-400">Berths</span>
