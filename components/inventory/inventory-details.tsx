@@ -4,9 +4,22 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Users, Phone, Mail, ArrowLeft, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Users, Phone, Mail, ArrowLeft, Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { getInventoryItem, InventoryItem } from '@/lib/api/inventory';
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 interface InventoryDetailsProps {
   id: string;
@@ -17,6 +30,8 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeImage, setActiveImage] = useState(0);
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
+  const [fullscreenImageIndex, setFullscreenImageIndex] = useState(0);
 
   useEffect(() => {
     loadInventoryItem();
@@ -31,6 +46,23 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
       setError(error.message || 'Failed to load vehicle details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openFullscreen = (index: number) => {
+    setFullscreenImageIndex(index);
+    setIsFullscreenOpen(true);
+  };
+
+  const nextFullscreenImage = () => {
+    if (item?.images) {
+      setFullscreenImageIndex((prev) => (prev + 1) % item.images.length);
+    }
+  };
+
+  const prevFullscreenImage = () => {
+    if (item?.images) {
+      setFullscreenImageIndex((prev) => (prev - 1 + item.images.length) % item.images.length);
     }
   };
 
@@ -59,6 +91,27 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
 
   return (
     <div className="max-w-7xl mx-auto">
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb className="mb-8">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/">Home</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/inventory">Inventory</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{item.title}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       <div className="mb-8 flex items-center justify-between">
         <Link href="/inventory">
           <Button variant="ghost" className="flex items-center gap-2">
@@ -81,26 +134,70 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Images */}
+        {/* Images Section */}
         <div className="space-y-4">
-          <div className="aspect-[4/3] relative rounded-lg overflow-hidden">
+          {/* Main Image */}
+          <div className="aspect-[4/3] relative rounded-lg overflow-hidden cursor-pointer group">
             <div 
-              className="w-full h-full bg-cover bg-center"
+              className="w-full h-full bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
               style={{ backgroundImage: `url(${images[activeImage]})` }}
+              onClick={() => openFullscreen(activeImage)}
             />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-black/90 px-3 py-1 rounded-full text-sm font-medium">
+                Click to view full size
+              </div>
+            </div>
+            {images.length > 1 && (
+              <>
+                <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
+                  {activeImage + 1} / {images.length}
+                </div>
+                {activeImage > 0 && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveImage(activeImage - 1);
+                    }}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                )}
+                {activeImage < images.length - 1 && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveImage(activeImage + 1);
+                    }}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                )}
+              </>
+            )}
           </div>
+
+          {/* Thumbnail Grid */}
           {images.length > 1 && (
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-2">
               {images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveImage(index)}
                   className={`aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all ${
-                    activeImage === index ? 'border-amber-500' : 'border-transparent'
+                    activeImage === index 
+                      ? 'border-amber-500 ring-2 ring-amber-200' 
+                      : 'border-transparent hover:border-slate-300'
                   }`}
                 >
                   <div 
-                    className="w-full h-full bg-cover bg-center"
+                    className="w-full h-full bg-cover bg-center hover:scale-105 transition-transform duration-200"
                     style={{ backgroundImage: `url(${image})` }}
                   />
                 </button>
@@ -109,7 +206,7 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
           )}
         </div>
 
-        {/* Details */}
+        {/* Details Section */}
         <div className="space-y-8">
           <div>
             <h1 className="text-3xl font-bold font-playfair mb-2">{item.title}</h1>
@@ -187,6 +284,80 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
           )}
         </div>
       </div>
+
+      {/* Fullscreen Image Modal */}
+      <Dialog open={isFullscreenOpen} onOpenChange={setIsFullscreenOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95">
+          <div className="relative w-full h-[90vh] flex items-center justify-center">
+            {/* Close Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 z-10 text-white hover:bg-white/20"
+              onClick={() => setIsFullscreenOpen(false)}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+
+            {/* Image Counter */}
+            <div className="absolute top-4 left-4 z-10 bg-black/50 text-white px-3 py-1 rounded text-sm">
+              {fullscreenImageIndex + 1} / {images.length}
+            </div>
+
+            {/* Main Image */}
+            <img
+              src={images[fullscreenImageIndex]}
+              alt={`${item.title} - Image ${fullscreenImageIndex + 1}`}
+              className="max-w-full max-h-full object-contain"
+            />
+
+            {/* Navigation Arrows */}
+            {images.length > 1 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20"
+                  onClick={prevFullscreenImage}
+                >
+                  <ChevronLeft className="h-8 w-8" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20"
+                  onClick={nextFullscreenImage}
+                >
+                  <ChevronRight className="h-8 w-8" />
+                </Button>
+              </>
+            )}
+
+            {/* Thumbnail Strip */}
+            {images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 bg-black/50 p-2 rounded-lg max-w-[90vw] overflow-x-auto">
+                {images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setFullscreenImageIndex(index)}
+                    className={`flex-shrink-0 w-16 h-12 rounded overflow-hidden border-2 transition-all ${
+                      fullscreenImageIndex === index 
+                        ? 'border-amber-500' 
+                        : 'border-transparent hover:border-white/50'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
