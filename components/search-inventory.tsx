@@ -8,7 +8,7 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const priceRanges = [
-  { label: "Any Price", value: "" },
+  { label: "Any Price", value: "all" },
   { label: "£50,000 - £100,000", value: "50000-100000" },
   { label: "£100,000 - £150,000", value: "100000-150000" },
   { label: "£150,000 - £200,000", value: "150000-200000" },
@@ -16,14 +16,14 @@ const priceRanges = [
 ];
 
 const makes = [
-  { label: "All Makes", value: "" },
+  { label: "All Makes", value: "all" },
   { label: "Mercedes-Benz", value: "mercedes" },
   { label: "Fiat", value: "fiat" },
   { label: "Volkswagen", value: "volkswagen" }
 ];
 
 const berths = [
-  { label: "Any Berths", value: "" },
+  { label: "Any Berths", value: "all" },
   { label: "2 Berths", value: "2" },
   { label: "3 Berths", value: "3" },
   { label: "4 Berths", value: "4" },
@@ -35,9 +35,9 @@ export function SearchInventory() {
   const router = useRouter();
   const [searchParams, setSearchParams] = useState({
     keyword: "",
-    priceRange: "",
-    make: "",
-    berths: ""
+    priceRange: "all",
+    make: "all",
+    berths: "all"
   });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -50,15 +50,15 @@ export function SearchInventory() {
       params.set('search', searchParams.keyword);
     }
     
-    if (searchParams.make) {
+    if (searchParams.make && searchParams.make !== "all") {
       params.set('make', searchParams.make);
     }
     
-    if (searchParams.berths) {
+    if (searchParams.berths && searchParams.berths !== "all") {
       params.set('berths', searchParams.berths);
     }
     
-    if (searchParams.priceRange) {
+    if (searchParams.priceRange && searchParams.priceRange !== "all") {
       const [min, max] = searchParams.priceRange.split('-');
       if (min) params.set('minPrice', min);
       if (max) params.set('maxPrice', max);

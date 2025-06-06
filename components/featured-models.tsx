@@ -19,8 +19,11 @@ export function FeaturedModels() {
   const loadFeaturedModels = async () => {
     try {
       setLoading(true);
-      const { items } = await getInventoryItems({ status: 'available' }, 6);
-      setFeaturedItems(items);
+      // Remove the status filter to avoid the composite index requirement
+      const { items } = await getInventoryItems({}, 6);
+      // Filter for available items on the client side
+      const availableItems = items.filter(item => item.status === 'available');
+      setFeaturedItems(availableItems.slice(0, 6));
     } catch (error) {
       console.error('Error loading featured models:', error);
     } finally {
@@ -30,7 +33,7 @@ export function FeaturedModels() {
 
   if (loading) {
     return (
-      <section id="models\" className="py-20 bg-slate-50 dark:bg-slate-900">
+      <section id="models" className="py-20 bg-slate-50 dark:bg-slate-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
