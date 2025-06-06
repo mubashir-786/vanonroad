@@ -1,11 +1,3 @@
-import { 
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  User
-} from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-
 export interface AuthUser {
   uid: string;
   email: string | null;
@@ -22,8 +14,15 @@ export function isAdminEmail(email: string): boolean {
 }
 
 export async function signInAdmin(email: string, password: string): Promise<AuthUser> {
+  if (typeof window === 'undefined') {
+    throw new Error('Authentication only available on client side');
+  }
+
   try {
-    if (!auth.signInWithEmailAndPassword) {
+    const { signInWithEmailAndPassword } = await import('firebase/auth');
+    const { auth } = await import('@/lib/firebase');
+    
+    if (!auth || typeof auth !== 'object') {
       throw new Error('Firebase not properly initialized');
     }
     
@@ -31,6 +30,7 @@ export async function signInAdmin(email: string, password: string): Promise<Auth
     const user = userCredential.user;
     
     if (!isAdminEmail(user.email || '')) {
+      const { signOut } = await import('firebase/auth');
       await signOut(auth);
       throw new Error('Access denied. Admin privileges required.');
     }
@@ -46,10 +46,18 @@ export async function signInAdmin(email: string, password: string): Promise<Auth
 }
 
 export async function signOutAdmin(): Promise<void> {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   try {
-    if (!auth.signOut) {
+    const { signOut } = await import('firebase/auth');
+    const { auth } = await import('@/lib/firebase');
+    
+    if (!auth || typeof auth !== 'object') {
       throw new Error('Firebase not properly initialized');
     }
+    
     await signOut(auth);
   } catch (error: any) {
     throw new Error(error.message || 'Sign out failed');
@@ -57,23 +65,36 @@ export async function signOutAdmin(): Promise<void> {
 }
 
 export function onAuthStateChange(callback: (user: AuthUser | null) => void): () => void {
+  if (typeof window === 'undefined') {
+    callback(null);
+    return () => {};
+  }
+
   try {
-    if (!auth.onAuthStateChanged) {
-      callback(null);
-      return () => {};
-    }
-    
-    return onAuthStateChanged(auth, (user: User | null) => {
-      if (user && isAdminEmail(user.email || '')) {
-        callback({
-          uid: user.uid,
-          email: user.email,
-          isAdmin: true
+    import('firebase/auth').then(({ onAuthStateChanged }) => {
+      import('@/lib/firebase').then(({ auth }) => {
+        if (!auth || typeof auth !== 'object') {
+          callback(null);
+          return;
+        }
+        
+        return onAuthStateChanged(auth, (user: any) => {
+          if (user && isAdminEmail(user.email || '')) {
+            callback({
+              uid: user.uid,
+              email: user.email,
+              isAdmin: true
+            });
+          } else {
+            callback(null);
+          }
         });
-      } else {
-        callback(null);
-      }
+      });
+    }).catch(() => {
+      callback(null);
     });
+    
+    return () => {};
   } catch (error) {
     console.warn('Auth state change listener failed:', error);
     callback(null);

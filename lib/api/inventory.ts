@@ -1,57 +1,5 @@
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  doc, 
-  getDoc, 
-  updateDoc, 
-  deleteDoc,
-  query,
-  orderBy,
-  where,
-  limit,
-  startAfter,
-  DocumentData,
-  QueryDocumentSnapshot
-} from 'firebase/firestore';
-import { 
-  ref, 
-  uploadBytes, 
-  getDownloadURL, 
-  deleteObject 
-} from 'firebase/storage';
-import { db, storage } from '@/lib/firebase';
-
-export interface InventoryItem {
-  id?: string;
-  title: string;
-  price: number;
-  location: string;
-  berths: number;
-  length: number;
-  make: string;
-  model: string;
-  year: number;
-  description: string;
-  status: 'available' | 'sold' | 'reserved';
-  images: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface InventoryFilters {
-  make?: string;
-  berths?: number;
-  minPrice?: number;
-  maxPrice?: number;
-  status?: string;
-  search?: string;
-}
-
-const COLLECTION_NAME = 'inventory';
-
 // Mock data for development when Firebase is not available
-const mockInventoryItems: InventoryItem[] = [
+const mockInventoryItems: any[] = [
   {
     id: '1',
     title: '2024 Signature Series Luxury',
@@ -84,11 +32,56 @@ const mockInventoryItems: InventoryItem[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+  {
+    id: '3',
+    title: '2022 Urban Explorer',
+    price: 120000,
+    location: 'Lake District',
+    berths: 2,
+    length: 6.4,
+    make: 'volkswagen',
+    model: 'Urban',
+    year: 2022,
+    description: 'Compact and efficient motorhome perfect for couples.',
+    status: 'available',
+    images: ['https://images.pexels.com/photos/2918521/pexels-photo-2918521.jpeg'],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
 ];
+
+export interface InventoryItem {
+  id?: string;
+  title: string;
+  price: number;
+  location: string;
+  berths: number;
+  length: number;
+  make: string;
+  model: string;
+  year: number;
+  description: string;
+  status: 'available' | 'sold' | 'reserved';
+  images: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface InventoryFilters {
+  make?: string;
+  berths?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  status?: string;
+  search?: string;
+}
 
 // Check if Firebase is properly initialized
 function isFirebaseAvailable(): boolean {
-  return db && typeof db === 'object' && 'collection' in db;
+  return typeof window !== 'undefined' && 
+         typeof db === 'object' && 
+         db !== null && 
+         'collection' in db;
 }
 
 // Upload multiple images to Firebase Storage
@@ -99,6 +92,9 @@ export async function uploadImages(files: File[], itemId: string): Promise<strin
   }
 
   try {
+    const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+    const { storage } = await import('@/lib/firebase');
+    
     const uploadPromises = files.map(async (file, index) => {
       const fileName = `${itemId}_${index}_${Date.now()}_${file.name}`;
       const storageRef = ref(storage, `inventory/${fileName}`);
@@ -123,6 +119,9 @@ export async function deleteImages(imageUrls: string[]): Promise<void> {
   }
 
   try {
+    const { ref, deleteObject } = await import('firebase/storage');
+    const { storage } = await import('@/lib/firebase');
+    
     const deletePromises = imageUrls.map(async (url) => {
       try {
         const imageRef = ref(storage, url);
@@ -158,8 +157,11 @@ export async function createInventoryItem(
   }
 
   try {
+    const { collection, addDoc, updateDoc } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase');
+    
     const now = new Date();
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+    const docRef = await addDoc(collection(db, 'inventory'), {
       ...data,
       images: [], // Will be updated after image upload
       createdAt: now,
@@ -182,9 +184,8 @@ export async function createInventoryItem(
 // Get all inventory items with optional filters
 export async function getInventoryItems(
   filters?: InventoryFilters,
-  pageSize: number = 10,
-  lastDoc?: QueryDocumentSnapshot<DocumentData>
-): Promise<{ items: InventoryItem[]; lastDoc?: QueryDocumentSnapshot<DocumentData> }> {
+  pageSize: number = 10
+): Promise<{ items: InventoryItem[] }> {
   if (!isFirebaseAvailable()) {
     // Return mock data for development
     let filteredItems = [...mockInventoryItems];
@@ -223,7 +224,10 @@ export async function getInventoryItems(
   }
 
   try {
-    let q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'desc'));
+    const { collection, getDocs, query, orderBy, where, limit } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase');
+    
+    let q = query(collection(db, 'inventory'), orderBy('createdAt', 'desc'));
 
     // Apply filters
     if (filters?.make) {
@@ -242,15 +246,10 @@ export async function getInventoryItems(
       q = query(q, where('price', '<=', filters.maxPrice));
     }
 
-    // Add pagination
-    if (lastDoc) {
-      q = query(q, startAfter(lastDoc));
-    }
     q = query(q, limit(pageSize));
 
     const querySnapshot = await getDocs(q);
     const items: InventoryItem[] = [];
-    let newLastDoc: QueryDocumentSnapshot<DocumentData> | undefined;
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
@@ -260,7 +259,6 @@ export async function getInventoryItems(
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate(),
       } as InventoryItem);
-      newLastDoc = doc;
     });
 
     // Filter by search term (client-side for now)
@@ -275,7 +273,7 @@ export async function getInventoryItems(
       );
     }
 
-    return { items: filteredItems, lastDoc: newLastDoc };
+    return { items: filteredItems };
   } catch (error) {
     console.error('Error getting inventory items:', error);
     throw error;
@@ -290,7 +288,10 @@ export async function getInventoryItem(id: string): Promise<InventoryItem | null
   }
 
   try {
-    const docRef = doc(db, COLLECTION_NAME, id);
+    const { doc, getDoc } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase');
+    
+    const docRef = doc(db, 'inventory', id);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -331,7 +332,10 @@ export async function updateInventoryItem(
   }
 
   try {
-    const docRef = doc(db, COLLECTION_NAME, id);
+    const { doc, updateDoc } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase');
+    
+    const docRef = doc(db, 'inventory', id);
     
     // Delete old images if specified
     if (imagesToDelete && imagesToDelete.length > 0) {
@@ -385,6 +389,9 @@ export async function deleteInventoryItem(id: string): Promise<void> {
   }
 
   try {
+    const { doc, deleteDoc } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase');
+    
     // Get the item to delete its images
     const item = await getInventoryItem(id);
     
@@ -393,7 +400,7 @@ export async function deleteInventoryItem(id: string): Promise<void> {
     }
 
     // Delete the document
-    const docRef = doc(db, COLLECTION_NAME, id);
+    const docRef = doc(db, 'inventory', id);
     await deleteDoc(docRef);
   } catch (error) {
     console.error('Error deleting inventory item:', error);

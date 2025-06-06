@@ -1,7 +1,9 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getStorage } from 'firebase/storage';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps } from 'firebase/app';
+
+// Only import Firebase modules on the client side
+let auth: any = null;
+let storage: any = null;
+let db: any = null;
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "demo-api-key",
@@ -12,20 +14,38 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "demo-app-id"
 };
 
-// Initialize Firebase
-let app;
-let auth;
-let storage;
-let db;
+// Initialize Firebase only on client side
+let app: any = null;
 
-try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  storage = getStorage(app);
-  db = getFirestore(app);
-} catch (error) {
-  console.warn('Firebase initialization failed:', error);
-  // Create mock objects for development
+if (typeof window !== 'undefined') {
+  try {
+    // Check if Firebase app is already initialized
+    if (!getApps().length) {
+      app = initializeApp(firebaseConfig);
+    } else {
+      app = getApps()[0];
+    }
+    
+    // Dynamically import Firebase modules only on client side
+    import('firebase/auth').then(({ getAuth }) => {
+      auth = getAuth(app);
+    }).catch(console.warn);
+    
+    import('firebase/storage').then(({ getStorage }) => {
+      storage = getStorage(app);
+    }).catch(console.warn);
+    
+    import('firebase/firestore').then(({ getFirestore }) => {
+      db = getFirestore(app);
+    }).catch(console.warn);
+    
+  } catch (error) {
+    console.warn('Firebase initialization failed:', error);
+  }
+}
+
+// Create mock objects for server-side rendering
+if (typeof window === 'undefined') {
   auth = {} as any;
   storage = {} as any;
   db = {} as any;
