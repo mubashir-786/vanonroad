@@ -284,7 +284,7 @@ export function InventoryForm({ id }: InventoryFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {makesLoading ? (
-                    <SelectItem value="loading-makes" disabled>Loading makes...</SelectItem>
+                    <SelectItem value="loading-makes\" disabled>Loading makes...</SelectItem>
                   ) : makes.length === 0 ? (
                     <SelectItem value="no-makes" disabled>No makes available</SelectItem>
                   ) : (
