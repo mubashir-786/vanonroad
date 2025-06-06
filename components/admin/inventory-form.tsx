@@ -29,6 +29,20 @@ interface InventoryFormProps {
   id?: string;
 }
 
+// Define the form data type that matches what we're creating
+interface InventoryFormData {
+  title: string;
+  price: number;
+  location: string;
+  berths: number;
+  length: number;
+  make: string;
+  model: string;
+  year: number;
+  description: string;
+  status: 'available' | 'sold' | 'reserved';
+}
+
 export function InventoryForm({ id }: InventoryFormProps) {
   const router = useRouter();
   const isEditMode = !!id;
@@ -40,15 +54,15 @@ export function InventoryForm({ id }: InventoryFormProps) {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<InventoryFormData>({
     title: '',
-    price: '',
+    price: 0,
     location: '',
-    berths: '',
-    length: '',
+    berths: 2,
+    length: 0,
     make: '',
     model: '',
-    year: '',
+    year: new Date().getFullYear(),
     description: '',
     status: 'available'
   });
@@ -68,13 +82,13 @@ export function InventoryForm({ id }: InventoryFormProps) {
       if (item) {
         setFormData({
           title: item.title,
-          price: item.price.toString(),
+          price: item.price,
           location: item.location,
-          berths: item.berths.toString(),
-          length: item.length.toString(),
+          berths: item.berths,
+          length: item.length,
           make: item.make,
           model: item.model,
-          year: item.year.toString(),
+          year: item.year,
           description: item.description,
           status: item.status
         });
@@ -94,23 +108,39 @@ export function InventoryForm({ id }: InventoryFormProps) {
     setSuccess('');
 
     try {
-      const inventoryData = {
+      // Create the inventory data object that matches the expected type
+      const inventoryData: Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt'> = {
         title: formData.title,
-        price: parseFloat(formData.price),
+        price: formData.price,
         location: formData.location,
-        berths: parseInt(formData.berths),
-        length: parseFloat(formData.length),
+        berths: formData.berths,
+        length: formData.length,
         make: formData.make,
         model: formData.model,
-        year: parseInt(formData.year),
+        year: formData.year,
         description: formData.description,
-        status: formData.status as 'available' | 'sold' | 'reserved'
+        status: formData.status,
+        images: [] // This will be handled by the API functions
       };
 
       if (isEditMode && id) {
+        // For updates, we only pass the fields that can be updated
+        const updateData: Partial<Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt'>> = {
+          title: formData.title,
+          price: formData.price,
+          location: formData.location,
+          berths: formData.berths,
+          length: formData.length,
+          make: formData.make,
+          model: formData.model,
+          year: formData.year,
+          description: formData.description,
+          status: formData.status
+        };
+
         await updateInventoryItem(
           id,
-          inventoryData,
+          updateData,
           images.length > 0 ? images : undefined,
           imagesToDelete.length > 0 ? imagesToDelete : undefined
         );
@@ -133,11 +163,19 @@ export function InventoryForm({ id }: InventoryFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: name === 'price' || name === 'berths' || name === 'length' || name === 'year' 
+        ? parseFloat(value) || 0 
+        : value 
+    }));
   };
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleSelectChange = (name: keyof InventoryFormData, value: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: name === 'berths' ? parseInt(value) : value 
+    }));
   };
 
   const handleExistingImageRemove = (imageUrl: string) => {
@@ -269,7 +307,7 @@ export function InventoryForm({ id }: InventoryFormProps) {
             <div className="space-y-2">
               <Label htmlFor="berths">Berths</Label>
               <Select
-                value={formData.berths}
+                value={formData.berths.toString()}
                 onValueChange={(value) => handleSelectChange('berths', value)}
                 required
               >
@@ -317,7 +355,7 @@ export function InventoryForm({ id }: InventoryFormProps) {
             <Label htmlFor="status">Status</Label>
             <Select
               value={formData.status}
-              onValueChange={(value) => handleSelectChange('status', value)}
+              onValueChange={(value) => handleSelectChange('status', value as 'available' | 'sold' | 'reserved')}
               required
             >
               <SelectTrigger>
