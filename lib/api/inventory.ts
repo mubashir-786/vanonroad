@@ -113,36 +113,22 @@ export async function createInventoryItem(
 // Get all inventory items with optional filters
 export async function getInventoryItems(
   filters?: InventoryFilters,
-  pageSize: number = 10
+  pageSize: number = 50
 ): Promise<{ items: InventoryItem[] }> {
   try {
-    const { collection, getDocs, query, orderBy, where, limit } = await import('firebase/firestore');
+    const { collection, getDocs, query, orderBy, limit } = await import('firebase/firestore');
     const { db } = await import('@/lib/firebase');
     
     if (!db) {
       throw new Error('Firebase Firestore not initialized');
     }
     
-    let q = query(collection(db, 'inventory'), orderBy('createdAt', 'desc'));
-
-    // Apply filters
-    if (filters?.make) {
-      q = query(q, where('make', '==', filters.make));
-    }
-    if (filters?.berths) {
-      q = query(q, where('berths', '==', filters.berths));
-    }
-    if (filters?.status) {
-      q = query(q, where('status', '==', filters.status));
-    }
-    if (filters?.minPrice) {
-      q = query(q, where('price', '>=', filters.minPrice));
-    }
-    if (filters?.maxPrice) {
-      q = query(q, where('price', '<=', filters.maxPrice));
-    }
-
-    q = query(q, limit(pageSize));
+    // Simple query without where clauses to avoid composite index requirements
+    let q = query(
+      collection(db, 'inventory'), 
+      orderBy('createdAt', 'desc'),
+      limit(pageSize)
+    );
 
     const querySnapshot = await getDocs(q);
     const items: InventoryItem[] = [];
@@ -157,16 +143,41 @@ export async function getInventoryItems(
       } as InventoryItem);
     });
 
-    // Filter by search term (client-side for now)
+    // Apply all filters on the client side
     let filteredItems = items;
-    if (filters?.search) {
-      const searchTerm = filters.search.toLowerCase();
-      filteredItems = items.filter(item =>
-        item.title.toLowerCase().includes(searchTerm) ||
-        item.make.toLowerCase().includes(searchTerm) ||
-        item.model.toLowerCase().includes(searchTerm) ||
-        item.description.toLowerCase().includes(searchTerm)
-      );
+
+    if (filters) {
+      if (filters.make) {
+        filteredItems = filteredItems.filter(item => 
+          item.make.toLowerCase() === filters.make!.toLowerCase()
+        );
+      }
+      
+      if (filters.berths) {
+        filteredItems = filteredItems.filter(item => item.berths === filters.berths);
+      }
+      
+      if (filters.status) {
+        filteredItems = filteredItems.filter(item => item.status === filters.status);
+      }
+      
+      if (filters.minPrice) {
+        filteredItems = filteredItems.filter(item => item.price >= filters.minPrice!);
+      }
+      
+      if (filters.maxPrice) {
+        filteredItems = filteredItems.filter(item => item.price <= filters.maxPrice!);
+      }
+      
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        filteredItems = filteredItems.filter(item =>
+          item.title.toLowerCase().includes(searchTerm) ||
+          item.make.toLowerCase().includes(searchTerm) ||
+          item.model.toLowerCase().includes(searchTerm) ||
+          item.description.toLowerCase().includes(searchTerm)
+        );
+      }
     }
 
     return { items: filteredItems };
