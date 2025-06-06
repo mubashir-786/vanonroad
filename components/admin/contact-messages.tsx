@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Mail, MailOpen, Trash2, Eye } from 'lucide-react';
+import { Loader2, Mail, MailOpen, Trash2, Eye, RefreshCw } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +41,7 @@ import {
 export function ContactMessages() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -48,16 +49,26 @@ export function ContactMessages() {
     loadMessages();
   }, []);
 
-  const loadMessages = async () => {
+  const loadMessages = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError('');
       const contactMessages = await getContactMessages();
       setMessages(contactMessages);
     } catch (error: any) {
       setError(error.message || 'Failed to load messages');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    loadMessages(true);
   };
 
   const handleStatusUpdate = async (id: string, status: 'read' | 'unread') => {
@@ -106,16 +117,28 @@ export function ContactMessages() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Contact Messages</h2>
-        <div className="flex gap-2">
-          <Badge variant="outline">
-            Total: {messages.length}
-          </Badge>
-          <Badge variant="destructive">
-            Unread: {messages.filter(m => m.status === 'unread').length}
-          </Badge>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">Contact Messages</h2>
+          <div className="flex gap-2 mt-2">
+            <Badge variant="outline">
+              Total: {messages.length}
+            </Badge>
+            <Badge variant="destructive">
+              Unread: {messages.filter(m => m.status === 'unread').length}
+            </Badge>
+          </div>
         </div>
+        
+        <Button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </Button>
       </div>
 
       {error && (
