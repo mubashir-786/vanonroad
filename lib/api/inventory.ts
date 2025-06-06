@@ -1,4 +1,3 @@
-// Real database implementation using Supabase
 export interface InventoryItem {
   id?: string;
   title: string;
@@ -12,8 +11,8 @@ export interface InventoryItem {
   description: string;
   status: 'available' | 'sold' | 'reserved';
   images: string[];
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface InventoryFilters {
@@ -25,50 +24,24 @@ export interface InventoryFilters {
   search?: string;
 }
 
-// Supabase client setup
-let supabase: any = null;
-
-async function getSupabaseClient() {
-  if (supabase) return supabase;
-  
-  try {
-    const { createClient } = await import('@supabase/supabase-js');
-    
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase configuration missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.');
-    }
-    
-    supabase = createClient(supabaseUrl, supabaseAnonKey);
-    return supabase;
-  } catch (error) {
-    console.error('Failed to initialize Supabase:', error);
-    throw error;
-  }
-}
-
-// Upload multiple images to Supabase Storage
+// Upload multiple images to Firebase Storage
 export async function uploadImages(files: File[], itemId: string): Promise<string[]> {
   try {
-    const supabase = await getSupabaseClient();
+    const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+    const { storage } = await import('@/lib/firebase');
+    
+    if (!storage) {
+      throw new Error('Firebase Storage not initialized');
+    }
     
     const uploadPromises = files.map(async (file, index) => {
       const fileName = `${itemId}_${index}_${Date.now()}_${file.name}`;
-      const filePath = `inventory/${fileName}`;
+      const storageRef = ref(storage, `inventory/${fileName}`);
       
-      const { data, error } = await supabase.storage
-        .from('inventory-images')
-        .upload(filePath, file);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
       
-      if (error) throw error;
-      
-      const { data: { publicUrl } } = supabase.storage
-        .from('inventory-images')
-        .getPublicUrl(filePath);
-      
-      return publicUrl;
+      return downloadURL;
     });
 
     return Promise.all(uploadPromises);
@@ -78,23 +51,20 @@ export async function uploadImages(files: File[], itemId: string): Promise<strin
   }
 }
 
-// Delete images from Supabase Storage
+// Delete images from Firebase Storage
 export async function deleteImages(imageUrls: string[]): Promise<void> {
   try {
-    const supabase = await getSupabaseClient();
+    const { ref, deleteObject } = await import('firebase/storage');
+    const { storage } = await import('@/lib/firebase');
+    
+    if (!storage) {
+      throw new Error('Firebase Storage not initialized');
+    }
     
     const deletePromises = imageUrls.map(async (url) => {
       try {
-        // Extract file path from URL
-        const urlParts = url.split('/');
-        const fileName = urlParts[urlParts.length - 1];
-        const filePath = `inventory/${fileName}`;
-        
-        const { error } = await supabase.storage
-          .from('inventory-images')
-          .remove([filePath]);
-        
-        if (error) console.error('Error deleting image:', error);
+        const imageRef = ref(storage, url);
+        await deleteObject(imageRef);
       } catch (error) {
         console.error('Error deleting image:', error);
       }
@@ -108,38 +78,32 @@ export async function deleteImages(imageUrls: string[]): Promise<void> {
 
 // Create new inventory item
 export async function createInventoryItem(
-  data: Omit<InventoryItem, 'id' | 'created_at' | 'updated_at'>,
+  data: Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt'>,
   imageFiles: File[]
 ): Promise<string> {
   try {
-    const supabase = await getSupabaseClient();
+    const { collection, addDoc, updateDoc } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase');
     
-    // First create the inventory item without images
-    const { data: item, error } = await supabase
-      .from('inventory')
-      .insert([{
-        ...data,
-        images: [], // Will be updated after image upload
-      }])
-      .select()
-      .single();
-
-    if (error) throw error;
+    if (!db) {
+      throw new Error('Firebase Firestore not initialized');
+    }
+    
+    const now = new Date();
+    const docRef = await addDoc(collection(db, 'inventory'), {
+      ...data,
+      images: [], // Will be updated after image upload
+      createdAt: now,
+      updatedAt: now,
+    });
 
     // Upload images if provided
     if (imageFiles.length > 0) {
-      const imageUrls = await uploadImages(imageFiles, item.id);
-      
-      // Update the item with image URLs
-      const { error: updateError } = await supabase
-        .from('inventory')
-        .update({ images: imageUrls })
-        .eq('id', item.id);
-      
-      if (updateError) throw updateError;
+      const imageUrls = await uploadImages(imageFiles, docRef.id);
+      await updateDoc(docRef, { images: imageUrls });
     }
 
-    return item.id;
+    return docRef.id;
   } catch (error) {
     console.error('Error creating inventory item:', error);
     throw error;
@@ -152,39 +116,60 @@ export async function getInventoryItems(
   pageSize: number = 10
 ): Promise<{ items: InventoryItem[] }> {
   try {
-    const supabase = await getSupabaseClient();
+    const { collection, getDocs, query, orderBy, where, limit } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase');
     
-    let query = supabase
-      .from('inventory')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(pageSize);
+    if (!db) {
+      throw new Error('Firebase Firestore not initialized');
+    }
+    
+    let q = query(collection(db, 'inventory'), orderBy('createdAt', 'desc'));
 
     // Apply filters
     if (filters?.make) {
-      query = query.eq('make', filters.make);
+      q = query(q, where('make', '==', filters.make));
     }
     if (filters?.berths) {
-      query = query.eq('berths', filters.berths);
+      q = query(q, where('berths', '==', filters.berths));
     }
     if (filters?.status) {
-      query = query.eq('status', filters.status);
+      q = query(q, where('status', '==', filters.status));
     }
     if (filters?.minPrice) {
-      query = query.gte('price', filters.minPrice);
+      q = query(q, where('price', '>=', filters.minPrice));
     }
     if (filters?.maxPrice) {
-      query = query.lte('price', filters.maxPrice);
+      q = query(q, where('price', '<=', filters.maxPrice));
     }
+
+    q = query(q, limit(pageSize));
+
+    const querySnapshot = await getDocs(q);
+    const items: InventoryItem[] = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      items.push({
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate(),
+        updatedAt: data.updatedAt?.toDate(),
+      } as InventoryItem);
+    });
+
+    // Filter by search term (client-side for now)
+    let filteredItems = items;
     if (filters?.search) {
-      query = query.or(`title.ilike.%${filters.search}%,make.ilike.%${filters.search}%,model.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      const searchTerm = filters.search.toLowerCase();
+      filteredItems = items.filter(item =>
+        item.title.toLowerCase().includes(searchTerm) ||
+        item.make.toLowerCase().includes(searchTerm) ||
+        item.model.toLowerCase().includes(searchTerm) ||
+        item.description.toLowerCase().includes(searchTerm)
+      );
     }
 
-    const { data, error } = await query;
-
-    if (error) throw error;
-
-    return { items: data || [] };
+    return { items: filteredItems };
   } catch (error) {
     console.error('Error getting inventory items:', error);
     throw error;
@@ -194,22 +179,27 @@ export async function getInventoryItems(
 // Get single inventory item by ID
 export async function getInventoryItem(id: string): Promise<InventoryItem | null> {
   try {
-    const supabase = await getSupabaseClient();
+    const { doc, getDoc } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase');
     
-    const { data, error } = await supabase
-      .from('inventory')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Item not found
-      }
-      throw error;
+    if (!db) {
+      throw new Error('Firebase Firestore not initialized');
     }
+    
+    const docRef = doc(db, 'inventory', id);
+    const docSnap = await getDoc(docRef);
 
-    return data;
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        ...data,
+        createdAt: data.createdAt?.toDate(),
+        updatedAt: data.updatedAt?.toDate(),
+      } as InventoryItem;
+    } else {
+      return null;
+    }
   } catch (error) {
     console.error('Error getting inventory item:', error);
     throw error;
@@ -219,12 +209,19 @@ export async function getInventoryItem(id: string): Promise<InventoryItem | null
 // Update inventory item
 export async function updateInventoryItem(
   id: string,
-  data: Partial<Omit<InventoryItem, 'id' | 'created_at' | 'updated_at'>>,
+  data: Partial<Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt'>>,
   newImageFiles?: File[],
   imagesToDelete?: string[]
 ): Promise<void> {
   try {
-    const supabase = await getSupabaseClient();
+    const { doc, updateDoc } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase');
+    
+    if (!db) {
+      throw new Error('Firebase Firestore not initialized');
+    }
+    
+    const docRef = doc(db, 'inventory', id);
     
     // Delete old images if specified
     if (imagesToDelete && imagesToDelete.length > 0) {
@@ -237,38 +234,29 @@ export async function updateInventoryItem(
       newImageUrls = await uploadImages(newImageFiles, id);
     }
 
-    // Prepare update data
+    // Update the document
     const updateData: any = {
       ...data,
-      updated_at: new Date().toISOString(),
+      updatedAt: new Date(),
     };
 
     // Handle image updates
-    if (newImageUrls.length > 0 || (imagesToDelete && imagesToDelete.length > 0)) {
+    if (newImageUrls.length > 0) {
       const currentItem = await getInventoryItem(id);
       const existingImages = currentItem?.images || [];
-      
-      let updatedImages = existingImages;
-      
-      // Remove deleted images
-      if (imagesToDelete && imagesToDelete.length > 0) {
-        updatedImages = existingImages.filter(url => !imagesToDelete.includes(url));
-      }
-      
-      // Add new images
-      if (newImageUrls.length > 0) {
-        updatedImages = [...updatedImages, ...newImageUrls];
-      }
-      
-      updateData.images = updatedImages;
+      const filteredExistingImages = existingImages.filter(url => 
+        !imagesToDelete?.includes(url)
+      );
+      updateData.images = [...filteredExistingImages, ...newImageUrls];
+    } else if (imagesToDelete && imagesToDelete.length > 0) {
+      const currentItem = await getInventoryItem(id);
+      const existingImages = currentItem?.images || [];
+      updateData.images = existingImages.filter(url => 
+        !imagesToDelete.includes(url)
+      );
     }
 
-    const { error } = await supabase
-      .from('inventory')
-      .update(updateData)
-      .eq('id', id);
-
-    if (error) throw error;
+    await updateDoc(docRef, updateData);
   } catch (error) {
     console.error('Error updating inventory item:', error);
     throw error;
@@ -278,7 +266,12 @@ export async function updateInventoryItem(
 // Delete inventory item
 export async function deleteInventoryItem(id: string): Promise<void> {
   try {
-    const supabase = await getSupabaseClient();
+    const { doc, deleteDoc } = await import('firebase/firestore');
+    const { db } = await import('@/lib/firebase');
+    
+    if (!db) {
+      throw new Error('Firebase Firestore not initialized');
+    }
     
     // Get the item to delete its images
     const item = await getInventoryItem(id);
@@ -287,13 +280,9 @@ export async function deleteInventoryItem(id: string): Promise<void> {
       await deleteImages(item.images);
     }
 
-    // Delete the item
-    const { error } = await supabase
-      .from('inventory')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+    // Delete the document
+    const docRef = doc(db, 'inventory', id);
+    await deleteDoc(docRef);
   } catch (error) {
     console.error('Error deleting inventory item:', error);
     throw error;
