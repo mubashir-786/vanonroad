@@ -108,21 +108,6 @@ export function InventoryForm({ id }: InventoryFormProps) {
     setSuccess('');
 
     try {
-      // Create the inventory data object that matches the expected type
-      const inventoryData: Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt'> = {
-        title: formData.title,
-        price: formData.price,
-        location: formData.location,
-        berths: formData.berths,
-        length: formData.length,
-        make: formData.make,
-        model: formData.model,
-        year: formData.year,
-        description: formData.description,
-        status: formData.status,
-        images: [] // This will be handled by the API functions
-      };
-
       if (isEditMode && id) {
         // For updates, we only pass the fields that can be updated
         const updateData: Partial<Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt'>> = {
@@ -146,6 +131,21 @@ export function InventoryForm({ id }: InventoryFormProps) {
         );
         setSuccess('Vehicle updated successfully!');
       } else {
+        // Create the inventory data object that matches the expected type
+        const inventoryData: Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt'> = {
+          title: formData.title,
+          price: formData.price,
+          location: formData.location,
+          berths: formData.berths,
+          length: formData.length,
+          make: formData.make,
+          model: formData.model,
+          year: formData.year,
+          description: formData.description,
+          status: formData.status,
+          images: [] // This will be handled by the API functions
+        };
+
         await createInventoryItem(inventoryData, images);
         setSuccess('Vehicle added successfully!');
       }
