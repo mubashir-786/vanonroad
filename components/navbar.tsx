@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ export function Navbar() {
   return (
     <header className={cn(
       "fixed w-full z-50 transition-all duration-300",
-      scrolled ? "bg-white/95 shadow-md backdrop-blur-sm dark:bg-slate-900/95" : "bg-transparent"
+      scrolled ? "bg-white/95 shadow-md backdrop-blur-sm dark:bg-slate-900/95" : "bg-white/95 shadow-md backdrop-blur-sm dark:bg-slate-900/95"
     )}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
@@ -59,10 +59,7 @@ export function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                className={cn(
-                  "font-medium hover:text-amber-500 transition-colors",
-                  scrolled ? "text-slate-700 dark:text-slate-200" : "text-white"
-                )}
+                className="font-medium text-slate-900 dark:text-slate-100 hover:text-amber-500 transition-colors"
               >
                 {link.name}
               </Link>
@@ -71,10 +68,7 @@ export function Navbar() {
 
           {/* Mobile Menu Button */}
           <button
-            className={cn(
-              "md:hidden p-2 rounded-md transition-colors",
-              scrolled ? "text-slate-900 dark:text-white" : "text-white"
-            )}
+            className="md:hidden p-2 rounded-md transition-colors text-slate-900 dark:text-slate-100"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -92,7 +86,7 @@ export function Navbar() {
             <Link
               key={link.name}
               href={link.href}
-              className="text-slate-700 dark:text-white font-medium hover:text-amber-500"
+              className="text-slate-900 dark:text-slate-100 font-medium hover:text-amber-500"
               onClick={() => setIsOpen(false)}
             >
               {link.name}

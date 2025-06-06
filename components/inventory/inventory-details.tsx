@@ -47,6 +47,14 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
   const openFullscreen = (index: number) => {
     setFullscreenImageIndex(index);
     setIsFullscreenOpen(true);
+    // Prevent body scroll when fullscreen is open
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeFullscreen = () => {
+    setIsFullscreenOpen(false);
+    // Restore body scroll
+    document.body.style.overflow = 'unset';
   };
 
   const nextFullscreenImage = () => {
@@ -65,18 +73,32 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
     if (!isFullscreenOpen) return;
     
     if (e.key === 'ArrowLeft') {
+      e.preventDefault();
       prevFullscreenImage();
     } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
       nextFullscreenImage();
     } else if (e.key === 'Escape') {
-      setIsFullscreenOpen(false);
+      e.preventDefault();
+      closeFullscreen();
     }
   };
 
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    if (isFullscreenOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
   }, [isFullscreenOpen, item?.images]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -108,25 +130,25 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/">Home</Link>
+              <Link href="/" className="text-slate-900 dark:text-slate-100">Home</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/inventory">Inventory</Link>
+              <Link href="/inventory" className="text-slate-900 dark:text-slate-100">Inventory</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>{item.title}</BreadcrumbPage>
+            <BreadcrumbPage className="text-slate-900 dark:text-slate-100">{item.title}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="mb-8 flex items-center justify-between">
         <Link href="/inventory">
-          <Button variant="ghost" className="flex items-center gap-2">
+          <Button variant="ghost" className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
             <ArrowLeft className="h-4 w-4" />
             Back to Inventory
           </Button>
@@ -150,9 +172,10 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
         <div className="space-y-4">
           {/* Main Image */}
           <div className="aspect-[4/3] relative rounded-lg overflow-hidden cursor-pointer group">
-            <div 
-              className="w-full h-full bg-cover bg-center transition-transform duration-300 group-hover:scale-105"
-              style={{ backgroundImage: `url(${images[activeImage]})` }}
+            <img
+              src={images[activeImage]}
+              alt={`${item.title} - Main image`}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               onClick={() => openFullscreen(activeImage)}
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -209,9 +232,10 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
                       : 'border-transparent hover:border-slate-300'
                   }`}
                 >
-                  <div 
-                    className="w-full h-full bg-cover bg-center hover:scale-105 transition-transform duration-200"
-                    style={{ backgroundImage: `url(${image})` }}
+                  <img
+                    src={image}
+                    alt={`${item.title} - Thumbnail ${index + 1}`}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
                   />
                 </button>
               ))}
@@ -222,28 +246,28 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
         {/* Details Section */}
         <div className="space-y-8">
           <div>
-            <h1 className="text-3xl font-bold font-playfair mb-2">{item.title}</h1>
+            <h1 className="text-3xl font-bold font-playfair mb-2 text-slate-900 dark:text-slate-100">{item.title}</h1>
             <p className="text-2xl font-semibold text-amber-500">£{item.price.toLocaleString()}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
               <MapPin className="h-5 w-5 text-amber-500" />
-              <span>{item.location}</span>
+              <span className="text-slate-900 dark:text-slate-100">{item.location}</span>
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-amber-500" />
-              <span>{item.year}</span>
+              <span className="text-slate-900 dark:text-slate-100">{item.year}</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-amber-500" />
-              <span>{item.berths} Berths</span>
+              <span className="text-slate-900 dark:text-slate-100">{item.berths} Berths</span>
             </div>
           </div>
 
           <Card>
             <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Description</h2>
+              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">Description</h2>
               <p className="text-slate-600 dark:text-slate-400 whitespace-pre-line">
                 {item.description}
               </p>
@@ -252,27 +276,27 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
 
           <Card>
             <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Specifications</h2>
+              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">Specifications</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex justify-between">
                   <span className="text-slate-600 dark:text-slate-400">Make</span>
-                  <span className="font-medium capitalize">{item.make}</span>
+                  <span className="font-medium capitalize text-slate-900 dark:text-slate-100">{item.make}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600 dark:text-slate-400">Model</span>
-                  <span className="font-medium">{item.model}</span>
+                  <span className="font-medium text-slate-900 dark:text-slate-100">{item.model}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600 dark:text-slate-400">Year</span>
-                  <span className="font-medium">{item.year}</span>
+                  <span className="font-medium text-slate-900 dark:text-slate-100">{item.year}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600 dark:text-slate-400">Berths</span>
-                  <span className="font-medium">{item.berths}</span>
+                  <span className="font-medium text-slate-900 dark:text-slate-100">{item.berths}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600 dark:text-slate-400">Status</span>
-                  <span className="font-medium capitalize">{item.status}</span>
+                  <span className="font-medium capitalize text-slate-900 dark:text-slate-100">{item.status}</span>
                 </div>
               </div>
             </CardContent>
@@ -281,7 +305,7 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
           {item.status === 'available' && (
             <Card>
               <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Contact</h2>
+                <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">Contact</h2>
                 <div className="space-y-4">
                   <Button className="w-full bg-amber-500 hover:bg-amber-600">
                     <Phone className="mr-2 h-4 w-4" />
@@ -300,14 +324,17 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
 
       {/* Fullscreen Image Modal */}
       {isFullscreenOpen && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
+        <div 
+          className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
+          onClick={closeFullscreen}
+        >
           <div className="relative w-full h-full flex items-center justify-center">
             {/* Close Button */}
             <Button
               variant="ghost"
               size="icon"
               className="absolute top-4 right-4 z-10 text-white hover:bg-white/20"
-              onClick={() => setIsFullscreenOpen(false)}
+              onClick={closeFullscreen}
             >
               <X className="h-6 w-6" />
             </Button>
@@ -322,6 +349,7 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
               src={images[fullscreenImageIndex]}
               alt={`${item.title} - Image ${fullscreenImageIndex + 1}`}
               className="max-w-[90vw] max-h-[90vh] object-contain"
+              onClick={(e) => e.stopPropagation()}
             />
 
             {/* Navigation Arrows */}
@@ -331,7 +359,10 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
                   variant="ghost"
                   size="icon"
                   className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 h-12 w-12"
-                  onClick={prevFullscreenImage}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prevFullscreenImage();
+                  }}
                 >
                   <ChevronLeft className="h-8 w-8" />
                 </Button>
@@ -339,7 +370,10 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
                   variant="ghost"
                   size="icon"
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 h-12 w-12"
-                  onClick={nextFullscreenImage}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextFullscreenImage();
+                  }}
                 >
                   <ChevronRight className="h-8 w-8" />
                 </Button>
@@ -352,7 +386,10 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
                 {images.map((image, index) => (
                   <button
                     key={index}
-                    onClick={() => setFullscreenImageIndex(index)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFullscreenImageIndex(index);
+                    }}
                     className={`flex-shrink-0 w-16 h-12 rounded overflow-hidden border-2 transition-all ${
                       fullscreenImageIndex === index 
                         ? 'border-amber-500' 
