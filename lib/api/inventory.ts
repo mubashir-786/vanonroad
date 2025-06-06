@@ -77,16 +77,26 @@ export interface InventoryFilters {
 }
 
 // Check if Firebase is properly initialized
-function isFirebaseAvailable(): boolean {
-  return typeof window !== 'undefined' && 
-         typeof db === 'object' && 
-         db !== null && 
-         'collection' in db;
+async function isFirebaseAvailable(): Promise<boolean> {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  
+  try {
+    const { db } = await import('@/lib/firebase');
+    return typeof db === 'object' && 
+           db !== null && 
+           'collection' in db;
+  } catch (error) {
+    return false;
+  }
 }
 
 // Upload multiple images to Firebase Storage
 export async function uploadImages(files: File[], itemId: string): Promise<string[]> {
-  if (!isFirebaseAvailable()) {
+  const firebaseAvailable = await isFirebaseAvailable();
+  
+  if (!firebaseAvailable) {
     // Return mock URLs for development
     return files.map((_, index) => `https://images.pexels.com/photos/mock-${itemId}-${index}.jpeg`);
   }
@@ -114,7 +124,9 @@ export async function uploadImages(files: File[], itemId: string): Promise<strin
 
 // Delete images from Firebase Storage
 export async function deleteImages(imageUrls: string[]): Promise<void> {
-  if (!isFirebaseAvailable()) {
+  const firebaseAvailable = await isFirebaseAvailable();
+  
+  if (!firebaseAvailable) {
     return; // Skip deletion in development mode
   }
 
@@ -142,7 +154,9 @@ export async function createInventoryItem(
   data: Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt'>,
   imageFiles: File[]
 ): Promise<string> {
-  if (!isFirebaseAvailable()) {
+  const firebaseAvailable = await isFirebaseAvailable();
+  
+  if (!firebaseAvailable) {
     // Mock implementation for development
     const mockId = Date.now().toString();
     const mockItem: InventoryItem = {
@@ -186,7 +200,9 @@ export async function getInventoryItems(
   filters?: InventoryFilters,
   pageSize: number = 10
 ): Promise<{ items: InventoryItem[] }> {
-  if (!isFirebaseAvailable()) {
+  const firebaseAvailable = await isFirebaseAvailable();
+  
+  if (!firebaseAvailable) {
     // Return mock data for development
     let filteredItems = [...mockInventoryItems];
     
@@ -282,7 +298,9 @@ export async function getInventoryItems(
 
 // Get single inventory item by ID
 export async function getInventoryItem(id: string): Promise<InventoryItem | null> {
-  if (!isFirebaseAvailable()) {
+  const firebaseAvailable = await isFirebaseAvailable();
+  
+  if (!firebaseAvailable) {
     // Return mock data for development
     return mockInventoryItems.find(item => item.id === id) || null;
   }
@@ -318,7 +336,9 @@ export async function updateInventoryItem(
   newImageFiles?: File[],
   imagesToDelete?: string[]
 ): Promise<void> {
-  if (!isFirebaseAvailable()) {
+  const firebaseAvailable = await isFirebaseAvailable();
+  
+  if (!firebaseAvailable) {
     // Mock implementation for development
     const itemIndex = mockInventoryItems.findIndex(item => item.id === id);
     if (itemIndex !== -1) {
@@ -379,7 +399,9 @@ export async function updateInventoryItem(
 
 // Delete inventory item
 export async function deleteInventoryItem(id: string): Promise<void> {
-  if (!isFirebaseAvailable()) {
+  const firebaseAvailable = await isFirebaseAvailable();
+  
+  if (!firebaseAvailable) {
     // Mock implementation for development
     const itemIndex = mockInventoryItems.findIndex(item => item.id === id);
     if (itemIndex !== -1) {
