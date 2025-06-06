@@ -18,22 +18,49 @@ let auth: any = null;
 let db: any = null;
 let storage: any = null;
 
-if (typeof window !== 'undefined') {
-  try {
-    // Check if Firebase app is already initialized
-    if (!getApps().length) {
-      app = initializeApp(firebaseConfig);
-    } else {
-      app = getApps()[0];
+function initializeFirebase() {
+  if (typeof window !== 'undefined' && !app) {
+    try {
+      // Check if Firebase app is already initialized
+      if (!getApps().length) {
+        app = initializeApp(firebaseConfig);
+      } else {
+        app = getApps()[0];
+      }
+      
+      auth = getAuth(app);
+      db = getFirestore(app);
+      storage = getStorage(app);
+    } catch (error) {
+      console.warn('Firebase initialization failed:', error);
     }
-    
-    auth = getAuth(app);
-    db = getFirestore(app);
-    storage = getStorage(app);
-  } catch (error) {
-    console.warn('Firebase initialization failed:', error);
   }
 }
 
+// Initialize on module load if on client side
+if (typeof window !== 'undefined') {
+  initializeFirebase();
+}
+
+// Getter functions to ensure Firebase is initialized before access
+export function getFirebaseAuth() {
+  if (typeof window === 'undefined') return null;
+  if (!auth) initializeFirebase();
+  return auth;
+}
+
+export function getFirebaseDb() {
+  if (typeof window === 'undefined') return null;
+  if (!db) initializeFirebase();
+  return db;
+}
+
+export function getFirebaseStorage() {
+  if (typeof window === 'undefined') return null;
+  if (!storage) initializeFirebase();
+  return storage;
+}
+
+// Legacy exports for backward compatibility
 export { auth, db, storage };
 export default app;

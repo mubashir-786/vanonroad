@@ -15,8 +15,9 @@ export async function createContactMessage(
 ): Promise<string> {
   try {
     const { collection, addDoc } = await import('firebase/firestore');
-    const { db } = await import('@/lib/firebase');
+    const { getFirebaseDb } = await import('@/lib/firebase');
     
+    const db = getFirebaseDb();
     if (!db) {
       throw new Error('Firebase Firestore not initialized');
     }
@@ -40,8 +41,9 @@ export async function createContactMessage(
 export async function getContactMessages(): Promise<ContactMessage[]> {
   try {
     const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
-    const { db } = await import('@/lib/firebase');
+    const { getFirebaseDb } = await import('@/lib/firebase');
     
+    const db = getFirebaseDb();
     if (!db) {
       throw new Error('Firebase Firestore not initialized');
     }
@@ -75,8 +77,9 @@ export async function getContactMessages(): Promise<ContactMessage[]> {
 export async function updateMessageStatus(id: string, status: 'read' | 'unread'): Promise<void> {
   try {
     const { doc, updateDoc } = await import('firebase/firestore');
-    const { db } = await import('@/lib/firebase');
+    const { getFirebaseDb } = await import('@/lib/firebase');
     
+    const db = getFirebaseDb();
     if (!db) {
       throw new Error('Firebase Firestore not initialized');
     }
@@ -96,8 +99,9 @@ export async function updateMessageStatus(id: string, status: 'read' | 'unread')
 export async function deleteContactMessage(id: string): Promise<void> {
   try {
     const { doc, deleteDoc } = await import('firebase/firestore');
-    const { db } = await import('@/lib/firebase');
+    const { getFirebaseDb } = await import('@/lib/firebase');
     
+    const db = getFirebaseDb();
     if (!db) {
       throw new Error('Firebase Firestore not initialized');
     }

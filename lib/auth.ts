@@ -20,8 +20,9 @@ export async function signInAdmin(email: string, password: string): Promise<Auth
 
   try {
     const { signInWithEmailAndPassword } = await import('firebase/auth');
-    const { auth } = await import('@/lib/firebase');
+    const { getFirebaseAuth } = await import('@/lib/firebase');
     
+    const auth = getFirebaseAuth();
     if (!auth) {
       throw new Error('Firebase not properly initialized');
     }
@@ -59,8 +60,9 @@ export async function signOutAdmin(): Promise<void> {
 
   try {
     const { signOut } = await import('firebase/auth');
-    const { auth } = await import('@/lib/firebase');
+    const { getFirebaseAuth } = await import('@/lib/firebase');
     
+    const auth = getFirebaseAuth();
     if (!auth) {
       throw new Error('Firebase not properly initialized');
     }
@@ -80,7 +82,8 @@ export function onAuthStateChange(callback: (user: AuthUser | null) => void): ()
   let unsubscribe: (() => void) | null = null;
 
   import('firebase/auth').then(({ onAuthStateChanged }) => {
-    import('@/lib/firebase').then(({ auth }) => {
+    import('@/lib/firebase').then(({ getFirebaseAuth }) => {
+      const auth = getFirebaseAuth();
       if (!auth) {
         callback(null);
         return;

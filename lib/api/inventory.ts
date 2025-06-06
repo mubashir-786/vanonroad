@@ -28,8 +28,9 @@ export interface InventoryFilters {
 export async function uploadImages(files: File[], itemId: string): Promise<string[]> {
   try {
     const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
-    const { storage } = await import('@/lib/firebase');
+    const { getFirebaseStorage } = await import('@/lib/firebase');
     
+    const storage = getFirebaseStorage();
     if (!storage) {
       throw new Error('Firebase Storage not initialized');
     }
@@ -55,8 +56,9 @@ export async function uploadImages(files: File[], itemId: string): Promise<strin
 export async function deleteImages(imageUrls: string[]): Promise<void> {
   try {
     const { ref, deleteObject } = await import('firebase/storage');
-    const { storage } = await import('@/lib/firebase');
+    const { getFirebaseStorage } = await import('@/lib/firebase');
     
+    const storage = getFirebaseStorage();
     if (!storage) {
       throw new Error('Firebase Storage not initialized');
     }
@@ -83,8 +85,9 @@ export async function createInventoryItem(
 ): Promise<string> {
   try {
     const { collection, addDoc, updateDoc } = await import('firebase/firestore');
-    const { db } = await import('@/lib/firebase');
+    const { getFirebaseDb } = await import('@/lib/firebase');
     
+    const db = getFirebaseDb();
     if (!db) {
       throw new Error('Firebase Firestore not initialized');
     }
@@ -117,8 +120,9 @@ export async function getInventoryItems(
 ): Promise<{ items: InventoryItem[] }> {
   try {
     const { collection, getDocs, query, orderBy, limit } = await import('firebase/firestore');
-    const { db } = await import('@/lib/firebase');
+    const { getFirebaseDb } = await import('@/lib/firebase');
     
+    const db = getFirebaseDb();
     if (!db) {
       throw new Error('Firebase Firestore not initialized');
     }
@@ -191,8 +195,9 @@ export async function getInventoryItems(
 export async function getInventoryItem(id: string): Promise<InventoryItem | null> {
   try {
     const { doc, getDoc } = await import('firebase/firestore');
-    const { db } = await import('@/lib/firebase');
+    const { getFirebaseDb } = await import('@/lib/firebase');
     
+    const db = getFirebaseDb();
     if (!db) {
       throw new Error('Firebase Firestore not initialized');
     }
@@ -226,8 +231,9 @@ export async function updateInventoryItem(
 ): Promise<void> {
   try {
     const { doc, updateDoc } = await import('firebase/firestore');
-    const { db } = await import('@/lib/firebase');
+    const { getFirebaseDb } = await import('@/lib/firebase');
     
+    const db = getFirebaseDb();
     if (!db) {
       throw new Error('Firebase Firestore not initialized');
     }
@@ -278,8 +284,9 @@ export async function updateInventoryItem(
 export async function deleteInventoryItem(id: string): Promise<void> {
   try {
     const { doc, deleteDoc } = await import('firebase/firestore');
-    const { db } = await import('@/lib/firebase');
+    const { getFirebaseDb } = await import('@/lib/firebase');
     
+    const db = getFirebaseDb();
     if (!db) {
       throw new Error('Firebase Firestore not initialized');
     }
