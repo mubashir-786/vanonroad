@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,47 +14,121 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { ImageUpload } from '@/components/admin/image-upload';
+import { 
+  createInventoryItem, 
+  updateInventoryItem, 
+  getInventoryItem,
+  InventoryItem 
+} from '@/lib/api/inventory';
 
-// Mock data for edit mode
-const mockInventoryItem = {
-  id: '1',
-  title: '2024 Signature Series Luxury',
-  price: '195000',
-  location: 'Yorkshire',
-  berths: '6',
-  length: '8.5',
-  make: 'mercedes',
-  model: 'Signature',
-  year: '2024',
-  description: 'Luxury motorhome with premium features...',
-  status: 'available'
-};
+interface InventoryFormProps {
+  id?: string;
+}
 
-export function InventoryForm({ id }: { id?: string }) {
+export function InventoryForm({ id }: InventoryFormProps) {
   const router = useRouter();
   const isEditMode = !!id;
-  const [formData, setFormData] = useState(
-    isEditMode ? mockInventoryItem : {
-      title: '',
-      price: '',
-      location: '',
-      berths: '',
-      length: '',
-      make: '',
-      model: '',
-      year: '',
-      description: '',
-      status: 'available'
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [images, setImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  
+  const [formData, setFormData] = useState({
+    title: '',
+    price: '',
+    location: '',
+    berths: '',
+    length: '',
+    make: '',
+    model: '',
+    year: '',
+    description: '',
+    status: 'available'
+  });
+
+  // Load existing data for edit mode
+  useEffect(() => {
+    if (isEditMode && id) {
+      loadInventoryItem(id);
     }
-  );
+  }, [isEditMode, id]);
+
+  const loadInventoryItem = async (itemId: string) => {
+    try {
+      setLoading(true);
+      const item = await getInventoryItem(itemId);
+      
+      if (item) {
+        setFormData({
+          title: item.title,
+          price: item.price.toString(),
+          location: item.location,
+          berths: item.berths.toString(),
+          length: item.length.toString(),
+          make: item.make,
+          model: item.model,
+          year: item.year.toString(),
+          description: item.description,
+          status: item.status
+        });
+        setExistingImages(item.images || []);
+      }
+    } catch (error: any) {
+      setError(error.message || 'Failed to load inventory item');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Implement form submission
-    console.log('Form submitted:', formData);
-    router.push('/admin');
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const inventoryData = {
+        title: formData.title,
+        price: parseFloat(formData.price),
+        location: formData.location,
+        berths: parseInt(formData.berths),
+        length: parseFloat(formData.length),
+        make: formData.make,
+        model: formData.model,
+        year: parseInt(formData.year),
+        description: formData.description,
+        status: formData.status as 'available' | 'sold' | 'reserved'
+      };
+
+      if (isEditMode && id) {
+        await updateInventoryItem(
+          id,
+          inventoryData,
+          images.length > 0 ? images : undefined,
+          imagesToDelete.length > 0 ? imagesToDelete : undefined
+        );
+        setSuccess('Vehicle updated successfully!');
+      } else {
+        await createInventoryItem(inventoryData, images);
+        setSuccess('Vehicle added successfully!');
+      }
+
+      // Redirect after success
+      setTimeout(() => {
+        router.push('/admin');
+      }, 2000);
+    } catch (error: any) {
+      setError(error.message || 'Failed to save vehicle');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -65,6 +139,19 @@ export function InventoryForm({ id }: { id?: string }) {
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
+  const handleExistingImageRemove = (imageUrl: string) => {
+    setImagesToDelete(prev => [...prev, imageUrl]);
+    setExistingImages(prev => prev.filter(url => url !== imageUrl));
+  };
+
+  if (loading && isEditMode) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <Card>
@@ -77,6 +164,18 @@ export function InventoryForm({ id }: { id?: string }) {
             </Button>
           </Link>
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {success && (
+          <Alert className="mb-6 border-green-200 bg-green-50 text-green-800">
+            <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
@@ -232,8 +331,30 @@ export function InventoryForm({ id }: { id?: string }) {
             </Select>
           </div>
 
-          <Button type="submit" className="w-full bg-amber-500 hover:bg-amber-600">
-            {isEditMode ? 'Update Vehicle' : 'Add Vehicle'}
+          <div className="space-y-2">
+            <Label>Images</Label>
+            <ImageUpload
+              images={images}
+              onImagesChange={setImages}
+              existingImages={existingImages}
+              onExistingImageRemove={handleExistingImageRemove}
+              maxImages={10}
+            />
+          </div>
+
+          <Button 
+            type="submit" 
+            className="w-full bg-amber-500 hover:bg-amber-600"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isEditMode ? 'Updating...' : 'Adding...'}
+              </>
+            ) : (
+              isEditMode ? 'Update Vehicle' : 'Add Vehicle'
+            )}
           </Button>
         </form>
       </CardContent>

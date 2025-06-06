@@ -1,9 +1,15 @@
+'use client';
+
+import { useState } from 'react';
 import { InventoryGrid } from '@/components/inventory/inventory-grid';
 import { InventoryFilters } from '@/components/inventory/inventory-filters';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
+import { InventoryFilters as IInventoryFilters } from '@/lib/api/inventory';
 
 export default function InventoryPage() {
+  const [filters, setFilters] = useState<IInventoryFilters>({});
+
   return (
     <>
       <Navbar />
@@ -20,9 +26,9 @@ export default function InventoryPage() {
           </div>
 
           <div className="grid lg:grid-cols-4 gap-8">
-            <InventoryFilters />
+            <InventoryFilters onFiltersChange={setFilters} />
             <div className="lg:col-span-3">
-              <InventoryGrid />
+              <InventoryGrid filters={filters} />
             </div>
           </div>
         </div>

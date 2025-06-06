@@ -13,19 +13,58 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { InventoryFilters as IInventoryFilters } from "@/lib/api/inventory";
 
-export function InventoryFilters() {
+interface InventoryFiltersProps {
+  onFiltersChange: (filters: IInventoryFilters) => void;
+}
+
+export function InventoryFilters({ onFiltersChange }: InventoryFiltersProps) {
   const [priceRange, setPriceRange] = useState([50000, 200000]);
+  const [filters, setFilters] = useState<IInventoryFilters>({});
+
+  const handleFilterChange = (key: keyof IInventoryFilters, value: any) => {
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    onFiltersChange(newFilters);
+  };
+
+  const handlePriceRangeChange = (values: number[]) => {
+    setPriceRange(values);
+    const newFilters = { 
+      ...filters, 
+      minPrice: values[0], 
+      maxPrice: values[1] 
+    };
+    setFilters(newFilters);
+    onFiltersChange(newFilters);
+  };
+
+  const clearFilters = () => {
+    const clearedFilters = {};
+    setFilters(clearedFilters);
+    setPriceRange([50000, 200000]);
+    onFiltersChange(clearedFilters);
+  };
 
   return (
     <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md h-fit">
-      <h2 className="text-xl font-bold mb-6">Filters</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold">Filters</h2>
+        <Button variant="ghost" size="sm" onClick={clearFilters}>
+          Clear All
+        </Button>
+      </div>
 
       <div className="space-y-6">
         {/* Search */}
         <div className="space-y-2">
           <Label>Search</Label>
-          <Input type="text" placeholder="Search motorhomes..." />
+          <Input 
+            type="text" 
+            placeholder="Search motorhomes..." 
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+          />
         </div>
 
         <Separator />
@@ -39,7 +78,7 @@ export function InventoryFilters() {
             min={0}
             step={5000}
             value={priceRange}
-            onValueChange={setPriceRange}
+            onValueChange={handlePriceRangeChange}
             className="mt-2"
           />
           <div className="flex items-center justify-between text-sm">
@@ -50,26 +89,10 @@ export function InventoryFilters() {
 
         <Separator />
 
-        {/* Type */}
-        <div className="space-y-2">
-          <Label>Type</Label>
-          <Select defaultValue="all">
-            <SelectTrigger>
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="luxury">Luxury Collection</SelectItem>
-              <SelectItem value="compact">Compact Range</SelectItem>
-              <SelectItem value="custom">Custom Build</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Make */}
         <div className="space-y-2">
           <Label>Make</Label>
-          <Select defaultValue="all">
+          <Select onValueChange={(value) => handleFilterChange('make', value === 'all' ? undefined : value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select make" />
             </SelectTrigger>
@@ -85,7 +108,7 @@ export function InventoryFilters() {
         {/* Berths */}
         <div className="space-y-2">
           <Label>Berths</Label>
-          <Select defaultValue="all">
+          <Select onValueChange={(value) => handleFilterChange('berths', value === 'all' ? undefined : parseInt(value))}>
             <SelectTrigger>
               <SelectValue placeholder="Select berths" />
             </SelectTrigger>
@@ -98,28 +121,21 @@ export function InventoryFilters() {
           </Select>
         </div>
 
-        {/* Year */}
+        {/* Status */}
         <div className="space-y-2">
-          <Label>Year</Label>
-          <Select defaultValue="all">
+          <Label>Status</Label>
+          <Select onValueChange={(value) => handleFilterChange('status', value === 'all' ? undefined : value)}>
             <SelectTrigger>
-              <SelectValue placeholder="Select year" />
+              <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Any Year</SelectItem>
-              <SelectItem value="2024">2024</SelectItem>
-              <SelectItem value="2023">2023</SelectItem>
-              <SelectItem value="2022">2022</SelectItem>
-              <SelectItem value="2021">2021</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="available">Available</SelectItem>
+              <SelectItem value="sold">Sold</SelectItem>
+              <SelectItem value="reserved">Reserved</SelectItem>
             </SelectContent>
           </Select>
         </div>
-
-        <Separator />
-
-        <Button className="w-full bg-amber-500 hover:bg-amber-600">
-          Apply Filters
-        </Button>
       </div>
     </div>
   );
