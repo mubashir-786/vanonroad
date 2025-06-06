@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Users, Phone, Mail, ArrowLeft, Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, MapPin, Users, Phone, Mail, ArrowLeft, Loader2, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import Link from 'next/link';
 import { getInventoryItem, InventoryItem } from '@/lib/api/inventory';
 import {
@@ -65,6 +65,23 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
       setFullscreenImageIndex((prev) => (prev - 1 + item.images.length) % item.images.length);
     }
   };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (!isFullscreenOpen) return;
+    
+    if (e.key === 'ArrowLeft') {
+      prevFullscreenImage();
+    } else if (e.key === 'ArrowRight') {
+      nextFullscreenImage();
+    } else if (e.key === 'Escape') {
+      setIsFullscreenOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreenOpen, item?.images]);
 
   if (loading) {
     return (
@@ -143,14 +160,15 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
               style={{ backgroundImage: `url(${images[activeImage]})` }}
               onClick={() => openFullscreen(activeImage)}
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-black/90 px-3 py-1 rounded-full text-sm font-medium">
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-black/90 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+                <ZoomIn className="h-4 w-4" />
                 Click to view full size
               </div>
             </div>
             {images.length > 1 && (
               <>
-                <div className="absolute top-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm">
+                <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded text-sm">
                   {activeImage + 1} / {images.length}
                 </div>
                 {activeImage > 0 && (
@@ -287,7 +305,7 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
 
       {/* Fullscreen Image Modal */}
       <Dialog open={isFullscreenOpen} onOpenChange={setIsFullscreenOpen}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95">
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none">
           <div className="relative w-full h-[90vh] flex items-center justify-center">
             {/* Close Button */}
             <Button
@@ -317,7 +335,7 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 h-12 w-12"
                   onClick={prevFullscreenImage}
                 >
                   <ChevronLeft className="h-8 w-8" />
@@ -325,7 +343,7 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20 h-12 w-12"
                   onClick={nextFullscreenImage}
                 >
                   <ChevronRight className="h-8 w-8" />
@@ -355,6 +373,11 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
                 ))}
               </div>
             )}
+
+            {/* Instructions */}
+            <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 text-white/70 text-sm text-center">
+              Use arrow keys or click arrows to navigate • Press ESC to close
+            </div>
           </div>
         </DialogContent>
       </Dialog>

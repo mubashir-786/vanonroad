@@ -18,6 +18,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export function AdminSidebar() {
   const { user } = useAuth();
@@ -63,9 +64,15 @@ export function AdminSidebar() {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center px-6 py-4 border-b">
-        <h1 className="text-xl font-bold font-playfair">
-          VAN <span className="text-amber-500">ON ROAD</span>
-        </h1>
+        <div className="w-28 h-10 relative">
+          <Image
+            src="/van_on_road_logo.svg"
+            alt="Van On Road"
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
       </div>
 
       {/* Navigation */}

@@ -46,7 +46,8 @@ export default function InventoryPage() {
     <>
       <Navbar />
       <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
-        <div className="pt-20 pb-8">
+        {/* Fixed spacing to account for navbar */}
+        <div className="pt-24 pb-8">
           <div className="container mx-auto px-4">
             {/* Breadcrumb Navigation */}
             <Breadcrumb className="mb-8">

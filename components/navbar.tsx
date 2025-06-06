@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,12 +42,15 @@ export function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <h1 className={cn(
-              "text-2xl font-bold tracking-tight transition-colors",
-              scrolled ? "text-slate-900 dark:text-white" : "text-white"
-            )}>
-              VAN <span className="text-amber-500"> ON ROAD</span>
-            </h1>
+            <div className="w-32 h-12 relative">
+              <Image
+                src="/van_on_road_logo.svg"
+                alt="Van On Road"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </Link>
 
           {/* Desktop Navigation */}

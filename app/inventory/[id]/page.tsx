@@ -16,9 +16,12 @@ export default function InventoryDetailsPage({ params }: { params: { id: string 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-slate-50 dark:bg-slate-900 pt-20">
-        <div className="container mx-auto px-4 py-12">
-          <InventoryDetails id={params.id} />
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        {/* Fixed spacing to account for navbar */}
+        <div className="pt-24 pb-8">
+          <div className="container mx-auto px-4 py-12">
+            <InventoryDetails id={params.id} />
+          </div>
         </div>
       </main>
       <Footer />
