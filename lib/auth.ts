@@ -15,7 +15,6 @@ export interface AuthUser {
 // Admin email addresses (you can move this to environment variables)
 const ADMIN_EMAILS = [
   'admin@vanonroad.com',
-  'manager@vanonroad.com'
 ];
 
 export function isAdminEmail(email: string): boolean {
