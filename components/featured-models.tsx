@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { BookOpen, Info, Maximize, Truck, Loader2 } from "lucide-react";
+import { BookOpen, Info, Truck, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getInventoryItems, InventoryItem } from "@/lib/api/inventory";
 import Link from "next/link";
@@ -33,7 +33,7 @@ export function FeaturedModels() {
 
   if (loading) {
     return (
-      <section id="models\" className="py-20 bg-slate-50 dark:bg-slate-900">
+      <section id="models" className="py-20 bg-slate-50 dark:bg-slate-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -118,10 +118,6 @@ function ModelCard({ model }: { model: InventoryItem }) {
         {model.year >= new Date().getFullYear() && (
           <Badge className="absolute top-4 right-4 bg-amber-500 hover:bg-amber-500">New Model</Badge>
         )}
-        <div className="absolute bottom-4 left-4 flex items-center text-white bg-slate-900/80 px-3 py-1 rounded">
-          <Maximize className="mr-1 h-4 w-4" />
-          <span className="text-sm">{model.length}m</span>
-        </div>
       </div>
       
       <CardContent className="pt-6 flex-grow">
