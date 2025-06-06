@@ -5,43 +5,68 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const priceRanges = [
-  "Any Price",
-  "£50,000 - £100,000",
-  "£100,000 - £150,000",
-  "£150,000 - £200,000",
-  "£200,000+"
+  { label: "Any Price", value: "" },
+  { label: "£50,000 - £100,000", value: "50000-100000" },
+  { label: "£100,000 - £150,000", value: "100000-150000" },
+  { label: "£150,000 - £200,000", value: "150000-200000" },
+  { label: "£200,000+", value: "200000-999999" }
 ];
 
-const types = [
-  "All Types",
-  "Luxury Collection",
-  "Compact Range",
-  "Custom Build"
+const makes = [
+  { label: "All Makes", value: "" },
+  { label: "Mercedes-Benz", value: "mercedes" },
+  { label: "Fiat", value: "fiat" },
+  { label: "Volkswagen", value: "volkswagen" }
 ];
 
 const berths = [
-  "Any Berths",
-  "2 Berths",
-  "3 Berths",
-  "4 Berths",
-  "5 Berths",
-  "6+ Berths"
+  { label: "Any Berths", value: "" },
+  { label: "2 Berths", value: "2" },
+  { label: "3 Berths", value: "3" },
+  { label: "4 Berths", value: "4" },
+  { label: "5 Berths", value: "5" },
+  { label: "6+ Berths", value: "6" }
 ];
 
 export function SearchInventory() {
+  const router = useRouter();
   const [searchParams, setSearchParams] = useState({
     keyword: "",
-    priceRange: "Any Price",
-    type: "All Types",
-    berths: "Any Berths"
+    priceRange: "",
+    make: "",
+    berths: ""
   });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle search logic here
-    console.log("Search params:", searchParams);
+    
+    // Build query parameters
+    const params = new URLSearchParams();
+    
+    if (searchParams.keyword) {
+      params.set('search', searchParams.keyword);
+    }
+    
+    if (searchParams.make) {
+      params.set('make', searchParams.make);
+    }
+    
+    if (searchParams.berths) {
+      params.set('berths', searchParams.berths);
+    }
+    
+    if (searchParams.priceRange) {
+      const [min, max] = searchParams.priceRange.split('-');
+      if (min) params.set('minPrice', min);
+      if (max) params.set('maxPrice', max);
+    }
+    
+    // Navigate to inventory page with search parameters
+    const queryString = params.toString();
+    router.push(`/inventory${queryString ? `?${queryString}` : ''}`);
   };
 
   return (
@@ -74,8 +99,8 @@ export function SearchInventory() {
               </SelectTrigger>
               <SelectContent>
                 {priceRanges.map((range) => (
-                  <SelectItem key={range} value={range}>
-                    {range}
+                  <SelectItem key={range.value} value={range.value}>
+                    {range.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -84,19 +109,19 @@ export function SearchInventory() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-900 dark:text-slate-200">
-              Type
+              Make
             </label>
             <Select
-              value={searchParams.type}
-              onValueChange={(value) => setSearchParams({ ...searchParams, type: value })}
+              value={searchParams.make}
+              onValueChange={(value) => setSearchParams({ ...searchParams, make: value })}
             >
               <SelectTrigger className="w-full bg-white dark:bg-slate-800">
-                <SelectValue placeholder="Type" />
+                <SelectValue placeholder="Make" />
               </SelectTrigger>
               <SelectContent>
-                {types.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
+                {makes.map((make) => (
+                  <SelectItem key={make.value} value={make.value}>
+                    {make.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -116,8 +141,8 @@ export function SearchInventory() {
               </SelectTrigger>
               <SelectContent>
                 {berths.map((berth) => (
-                  <SelectItem key={berth} value={berth}>
-                    {berth}
+                  <SelectItem key={berth.value} value={berth.value}>
+                    {berth.label}
                   </SelectItem>
                 ))}
               </SelectContent>

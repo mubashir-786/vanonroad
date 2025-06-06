@@ -12,16 +12,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { InventoryFilters as IInventoryFilters } from "@/lib/api/inventory";
 
 interface InventoryFiltersProps {
   onFiltersChange: (filters: IInventoryFilters) => void;
+  initialFilters?: IInventoryFilters;
 }
 
-export function InventoryFilters({ onFiltersChange }: InventoryFiltersProps) {
-  const [priceRange, setPriceRange] = useState([50000, 200000]);
-  const [filters, setFilters] = useState<IInventoryFilters>({});
+export function InventoryFilters({ onFiltersChange, initialFilters = {} }: InventoryFiltersProps) {
+  const [priceRange, setPriceRange] = useState([
+    initialFilters.minPrice || 50000, 
+    initialFilters.maxPrice || 200000
+  ]);
+  const [filters, setFilters] = useState<IInventoryFilters>(initialFilters);
+
+  // Update filters when initialFilters change
+  useEffect(() => {
+    setFilters(initialFilters);
+    setPriceRange([
+      initialFilters.minPrice || 50000,
+      initialFilters.maxPrice || 200000
+    ]);
+  }, [initialFilters]);
 
   const handleFilterChange = (key: keyof IInventoryFilters, value: any) => {
     const newFilters = { ...filters, [key]: value };
@@ -63,6 +76,7 @@ export function InventoryFilters({ onFiltersChange }: InventoryFiltersProps) {
           <Input 
             type="text" 
             placeholder="Search motorhomes..." 
+            value={filters.search || ''}
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
         </div>
@@ -92,7 +106,10 @@ export function InventoryFilters({ onFiltersChange }: InventoryFiltersProps) {
         {/* Make */}
         <div className="space-y-2">
           <Label>Make</Label>
-          <Select onValueChange={(value) => handleFilterChange('make', value === 'all' ? undefined : value)}>
+          <Select 
+            value={filters.make || 'all'} 
+            onValueChange={(value) => handleFilterChange('make', value === 'all' ? undefined : value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select make" />
             </SelectTrigger>
@@ -108,7 +125,10 @@ export function InventoryFilters({ onFiltersChange }: InventoryFiltersProps) {
         {/* Berths */}
         <div className="space-y-2">
           <Label>Berths</Label>
-          <Select onValueChange={(value) => handleFilterChange('berths', value === 'all' ? undefined : parseInt(value))}>
+          <Select 
+            value={filters.berths?.toString() || 'all'} 
+            onValueChange={(value) => handleFilterChange('berths', value === 'all' ? undefined : parseInt(value))}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select berths" />
             </SelectTrigger>
@@ -124,7 +144,10 @@ export function InventoryFilters({ onFiltersChange }: InventoryFiltersProps) {
         {/* Status */}
         <div className="space-y-2">
           <Label>Status</Label>
-          <Select onValueChange={(value) => handleFilterChange('status', value === 'all' ? undefined : value)}>
+          <Select 
+            value={filters.status || 'all'} 
+            onValueChange={(value) => handleFilterChange('status', value === 'all' ? undefined : value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
             </SelectTrigger>

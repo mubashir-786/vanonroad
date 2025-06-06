@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const heroImages = [
   "https://images.pexels.com/photos/2769583/pexels-photo-2769583.jpeg",
@@ -43,7 +44,7 @@ export function Hero() {
       {/* Content */}
       <div className="container relative h-full mx-auto px-4 flex flex-col justify-center">
         <div className="max-w-3xl pt-32 pb-8">
-          <h2 className="font-playfair text-5xl md:text-7xl font-bold mb-6 leading-tight text-white">
+          <h2 className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-white">
             Luxury Motorhomes <span className="text-amber-400">Built For You</span>
           </h2>
           <p className="text-lg md:text-xl text-slate-200 mb-8 max-w-2xl">
@@ -51,13 +52,17 @@ export function Hero() {
             and attention to detail, providing the ultimate in luxury travel experience.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-white rounded-md">
-              View Our Models
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button size="lg" variant="outline" className="border-white hover:text-white hover:bg-white/10 rounded-md">
-              Book a Showroom Visit
-            </Button>
+            <Link href="/inventory">
+              <Button size="lg" className="bg-amber-500 hover:bg-amber-600 text-white rounded-md">
+                View Our Inventory
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="#contact">
+              <Button size="lg" variant="outline" className="border-white text-white hover:text-slate-900 hover:bg-white/90 rounded-md">
+                Book a Showroom Visit
+              </Button>
+            </Link>
           </div>
         </div>
 

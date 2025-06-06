@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Menu, Phone, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -25,7 +25,6 @@ export function Navbar() {
 
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "Models", href: "#models" },
     { name: "Inventory", href: "/inventory" },
     { name: "About", href: "#about" },
     { name: "Services", href: "#services" },
@@ -43,7 +42,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <h1 className={cn(
-              "text-2xl font-playfair font-bold tracking-tight transition-colors",
+              "text-2xl font-bold tracking-tight transition-colors",
               scrolled ? "text-slate-900 dark:text-white" : "text-white"
             )}>
               VAN <span className="text-amber-500"> ON ROAD</span>
@@ -64,9 +63,6 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <Button className="bg-amber-500 hover:bg-amber-600 text-white rounded-md">
-              <Phone className="mr-2 h-4 w-4" /> Call Us
-            </Button>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -98,9 +94,6 @@ export function Navbar() {
               {link.name}
             </Link>
           ))}
-          <Button className="bg-amber-500 hover:bg-amber-600 text-white rounded-md w-full">
-            <Phone className="mr-2 h-4 w-4" /> Call Us
-          </Button>
         </nav>
       </div>
     </header>
