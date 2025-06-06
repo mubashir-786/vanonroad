@@ -284,9 +284,9 @@ export function InventoryForm({ id }: InventoryFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {makesLoading ? (
-                    <SelectItem value="\" disabled>Loading makes...</SelectItem>
+                    <SelectItem value="loading-makes" disabled>Loading makes...</SelectItem>
                   ) : makes.length === 0 ? (
-                    <SelectItem value="" disabled>No makes available</SelectItem>
+                    <SelectItem value="no-makes" disabled>No makes available</SelectItem>
                   ) : (
                     makes.map((make) => (
                       <SelectItem key={make.id} value={make.name}>

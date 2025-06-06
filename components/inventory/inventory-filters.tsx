@@ -136,7 +136,7 @@ export function InventoryFilters({ onFiltersChange, initialFilters = {} }: Inven
             <SelectContent>
               <SelectItem value="all">All Makes</SelectItem>
               {makesLoading ? (
-                <SelectItem value="" disabled>Loading makes...</SelectItem>
+                <SelectItem value="loading-makes" disabled>Loading makes...</SelectItem>
               ) : (
                 makes.map((make) => (
                   <SelectItem key={make.id} value={make.name}>
