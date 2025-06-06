@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ArrowRight, Mail, MapPin, Phone } from 'lucide-react';
+import { MapPin, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 export function Footer() {
@@ -9,7 +8,7 @@ export function Footer() {
   return (
     <footer className="bg-slate-900 text-white pt-20 pb-6">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-16">
           {/* Company Info */}
           <div>
             <h3 className="font-playfair text-2xl font-bold mb-6">
@@ -38,21 +37,21 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links - Updated to match header */}
           <div>
             <h4 className="font-bold text-lg mb-6">Quick Links</h4>
             <ul className="space-y-4">
-              <li><Link href="#" className="text-slate-300 hover:text-amber-500 transition-colors">Our Models</Link></li>
-              <li><Link href="#" className="text-slate-300 hover:text-amber-500 transition-colors">About Us</Link></li>
-              <li><Link href="#" className="text-slate-300 hover:text-amber-500 transition-colors">Services</Link></li>
-              <li><Link href="#" className="text-slate-300 hover:text-amber-500 transition-colors">Testimonials</Link></li>
-              <li><Link href="#" className="text-slate-300 hover:text-amber-500 transition-colors">Contact</Link></li>
+              <li><Link href="/" className="text-slate-300 hover:text-amber-500 transition-colors">Home</Link></li>
+              <li><Link href="/inventory" className="text-slate-300 hover:text-amber-500 transition-colors">Inventory</Link></li>
+              <li><Link href="#about" className="text-slate-300 hover:text-amber-500 transition-colors">About Us</Link></li>
+              <li><Link href="#testimonials" className="text-slate-300 hover:text-amber-500 transition-colors">Testimonials</Link></li>
+              <li><Link href="#contact" className="text-slate-300 hover:text-amber-500 transition-colors">Contact</Link></li>
               <li><Link href="#" className="text-slate-300 hover:text-amber-500 transition-colors">Privacy Policy</Link></li>
               <li><Link href="#" className="text-slate-300 hover:text-amber-500 transition-colors">Terms & Conditions</Link></li>
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Contact Information */}
           <div>
             <h4 className="font-bold text-lg mb-6">Contact Us</h4>
             <ul className="space-y-4">
@@ -74,25 +73,6 @@ export function Footer() {
                 <span className="text-slate-300">info@vanonroad.com</span>
               </li>
             </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h4 className="font-bold text-lg mb-6">Newsletter</h4>
-            <p className="text-slate-300 mb-4">
-              Subscribe to our newsletter to receive the latest updates on new models,
-              special offers and events.
-            </p>
-            <div className="flex gap-2">
-              <Input
-                type="email"
-                placeholder="Your email address"
-                className="bg-slate-800 border-slate-700 text-white"
-              />
-              <Button className="bg-amber-500 hover:bg-amber-600 text-white px-3">
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
         </div>
 
