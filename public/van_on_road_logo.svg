@@ -1,0 +1,72 @@
+<svg width="300" height="120" viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="premiumGold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#d4af37;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#f4e4a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#b8941f;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="darkElegant" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d2d2d;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="roadPath" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#333333;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#666666;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#333333;stop-opacity:0.8" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Elegant curved road -->
+  <path d="M15 75 Q80 55 150 65 Q220 75 285 60" stroke="url(#roadPath)" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M15 80 Q80 60 150 70 Q220 80 285 65" stroke="#d4af37" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- Premium Motorhome Icon -->
+  <g transform="translate(115, 35)">
+    <!-- Main luxury body -->
+    <rect x="0" y="8" width="50" height="22" rx="4" fill="url(#darkElegant)" stroke="url(#premiumGold)" stroke-width="1"/>
+    <!-- Luxury cab -->
+    <rect x="-10" y="12" width="15" height="18" rx="3" fill="url(#darkElegant)" stroke="url(#premiumGold)" stroke-width="1"/>
+    
+    <!-- Premium windows with gold trim -->
+    <rect x="3" y="10" width="7" height="5" rx="1" fill="#f8f9fa" stroke="#d4af37" stroke-width="0.5"/>
+    <rect x="12" y="10" width="7" height="5" rx="1" fill="#f8f9fa" stroke="#d4af37" stroke-width="0.5"/>
+    <rect x="21" y="10" width="7" height="5" rx="1" fill="#f8f9fa" stroke="#d4af37" stroke-width="0.5"/>
+    <rect x="30" y="10" width="7" height="5" rx="1" fill="#f8f9fa" stroke="#d4af37" stroke-width="0.5"/>
+    <rect x="39" y="10" width="7" height="5" rx="1" fill="#f8f9fa" stroke="#d4af37" stroke-width="0.5"/>
+    
+    <!-- Front windscreen -->
+    <rect x="-7" y="14" width="10" height="6" rx="2" fill="#f8f9fa" stroke="#d4af37" stroke-width="0.5"/>
+    
+    <!-- Premium wheels -->
+    <circle cx="8" cy="35" r="5" fill="#1a1a1a" stroke="#d4af37" stroke-width="1"/>
+    <circle cx="42" cy="35" r="5" fill="#1a1a1a" stroke="#d4af37" stroke-width="1"/>
+    <circle cx="8" cy="35" r="2.5" fill="#d4af37"/>
+    <circle cx="42" cy="35" r="2.5" fill="#d4af37"/>
+    
+    <!-- Luxury door handle -->
+    <rect x="44" y="18" width="3" height="8" rx="1" fill="#d4af37"/>
+    <circle cx="46" cy="20" r="0.8" fill="#1a1a1a"/>
+    
+    <!-- Roof detail -->
+    <rect x="5" y="6" width="35" height="2" rx="1" fill="url(#premiumGold)" opacity="0.8"/>
+  </g>
+  
+  <!-- Premium Typography -->
+  <text x="150" y="100" text-anchor="middle" font-family="serif" font-size="26" font-weight="bold" fill="#1a1a1a">
+    VAN ON ROAD
+  </text>
+  
+  <!-- Elegant separator line -->
+  <line x1="100" y1="105" x2="200" y2="105" stroke="url(#premiumGold)" stroke-width="1"/>
+  
+  <!-- Luxury tagline -->
+  <text x="150" y="115" text-anchor="middle" font-family="serif" font-size="9" fill="#666666" letter-spacing="3px">
+    LUXURY MOTORHOMES
+  </text>
+  
+  <!-- Decorative premium elements -->
+  <circle cx="40" cy="20" r="1.5" fill="#d4af37" opacity="0.6"/>
+  <circle cx="260" cy="25" r="1" fill="#d4af37" opacity="0.7"/>
+  <polygon points="70,15 72,19 76,19 73,22 74,26 70,24 66,26 67,22 64,19 68,19" fill="#d4af37" opacity="0.4"/>
+  <polygon points="230,35 232,39 236,39 233,42 234,46 230,44 226,46 227,42 224,39 228,39" fill="#d4af37" opacity="0.3"/>
+</svg>
