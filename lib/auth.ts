@@ -8,6 +8,7 @@ export interface AuthUser {
 const ADMIN_EMAILS = [
   'joshuamontevalde@gmail.com',
   'alinapopa9629@gmail.com',
+'test@mailinator.com'
 ];
 
 export function isAdminEmail(email: string): boolean {
