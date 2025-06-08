@@ -48,7 +48,7 @@ export function Services() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   return (
-    <section id="services" className="py-24 bg-slate-100 dark:bg-slate-900">
+    <section id="services\" className="py-24 bg-slate-100 dark:bg-slate-900">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold font-playfair mb-4">
