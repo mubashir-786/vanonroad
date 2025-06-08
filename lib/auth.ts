@@ -54,6 +54,35 @@ export async function signInAdmin(email: string, password: string): Promise<Auth
   }
 }
 
+export async function resetPassword(email: string): Promise<void> {
+  if (typeof window === 'undefined') {
+    throw new Error('Password reset only available on client side');
+  }
+
+  try {
+    const { sendPasswordResetEmail } = await import('firebase/auth');
+    const { getFirebaseAuth } = await import('@/lib/firebase');
+    
+    const auth = getFirebaseAuth();
+    if (!auth) {
+      throw new Error('Firebase not properly initialized');
+    }
+    
+    if (!isAdminEmail(email)) {
+      throw new Error('Access denied. Admin privileges required.');
+    }
+    
+    await sendPasswordResetEmail(auth, email);
+  } catch (error: any) {
+    if (error.code === 'auth/user-not-found') {
+      throw new Error('No account found with this email address.');
+    } else if (error.code === 'auth/invalid-email') {
+      throw new Error('Invalid email address.');
+    }
+    throw new Error(error.message || 'Failed to send password reset email');
+  }
+}
+
 export async function signOutAdmin(): Promise<void> {
   if (typeof window === 'undefined') {
     return;

@@ -8,37 +8,37 @@ import { cn } from "@/lib/utils";
 const services = [
   {
     id: "custom",
-    icon: <Settings className="h-12 w-12 mb-4 text-amber-500" />,
+    icon: <Settings className="h-12 w-12 mb-4 text-amber-500 mx-auto" />,
     title: "Bespoke Design",
     description: "Work with our design team to create your perfect motorhome, tailored to your specific requirements and taste."
   },
   {
     id: "build",
-    icon: <Truck className="h-12 w-12 mb-4 text-amber-500" />,
+    icon: <Truck className="h-12 w-12 mb-4 text-amber-500 mx-auto" />,
     title: "Custom Builds",
     description: "From chassis to completion, we build your motorhome with precision, using the highest quality materials."
   },
   {
     id: "paint",
-    icon: <PaintBucket className="h-12 w-12 mb-4 text-amber-500" />,
+    icon: <PaintBucket className="h-12 w-12 mb-4 text-amber-500 mx-auto" />,
     title: "Paint & Finishing",
     description: "Professional paint finishing in any color scheme, with optional graphics and branding."
   },
   {
     id: "service",
-    icon: <Wrench className="h-12 w-12 mb-4 text-amber-500" />,
+    icon: <Wrench className="h-12 w-12 mb-4 text-amber-500 mx-auto" />,
     title: "Servicing & Repairs",
     description: "Regular maintenance and repairs carried out by our experienced technicians to keep your motorhome in perfect condition."
   },
   {
     id: "refurbish",
-    icon: <RefreshCw className="h-12 w-12 mb-4 text-amber-500" />,
+    icon: <RefreshCw className="h-12 w-12 mb-4 text-amber-500 mx-auto" />,
     title: "Refurbishments",
     description: "Transform your existing motorhome with our comprehensive refurbishment services."
   },
   {
     id: "warranty",
-    icon: <Shield className="h-12 w-12 mb-4 text-amber-500" />,
+    icon: <Shield className="h-12 w-12 mb-4 text-amber-500 mx-auto" />,
     title: "Warranty & Support",
     description: "Peace of mind with our comprehensive warranty packages and ongoing customer support."
   },
@@ -48,7 +48,7 @@ export function Services() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   return (
-    <section id="services\" className="py-24 bg-slate-100 dark:bg-slate-900">
+    <section id="services" className="py-24 bg-slate-100 dark:bg-slate-900">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold font-playfair mb-4">
@@ -72,7 +72,9 @@ export function Services() {
               onMouseLeave={() => setHoveredCard(null)}
             >
               <CardContent className="p-8 text-center">
-                {service.icon}
+                <div className="flex justify-center">
+                  {service.icon}
+                </div>
                 <h3 className="text-xl font-bold mb-3 font-playfair">{service.title}</h3>
                 <p className="text-slate-600 dark:text-slate-400">{service.description}</p>
               </CardContent>
