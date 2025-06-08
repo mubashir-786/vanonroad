@@ -194,8 +194,8 @@ export function ContactSection() {
                 <div>
                   <h4 className="font-bold text-lg mb-1">Email</h4>
                   <p className="text-slate-600 dark:text-slate-400">
-                    Sales: joshuamontevalde@gmail.com<br />
-                    Service: alinapopa9629@gmail.com
+                    joshuamontevalde@gmail.com<br />
+                    alinapopa9629@gmail.com
                   </p>
                 </div>
               </div>

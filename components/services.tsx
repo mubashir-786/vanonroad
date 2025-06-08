@@ -48,7 +48,7 @@ export function Services() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   return (
-    <section id="services\" className="py-24 bg-slate-100 dark:bg-slate-900">
+    <section id="services" className="py-24 bg-slate-100 dark:bg-slate-900">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold font-playfair mb-4">
@@ -75,13 +75,6 @@ export function Services() {
                 {service.icon}
                 <h3 className="text-xl font-bold mb-3 font-playfair">{service.title}</h3>
                 <p className="text-slate-600 dark:text-slate-400">{service.description}</p>
-                
-                <div className={cn(
-                  "mt-6 inline-block text-amber-500 font-medium transition-all duration-300",
-                  hoveredCard === service.id ? "text-amber-600 translate-x-1" : ""
-                )}>
-                  Learn more →
-                </div>
               </CardContent>
             </Card>
           ))}

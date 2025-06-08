@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
 import { Award, CheckCircle, Clock, PenTool } from 'lucide-react';
 
 export function AboutUs() {
@@ -71,10 +70,6 @@ export function AboutUs() {
                 </div>
               </div>
             </div>
-            
-            <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white rounded-md">
-              Learn More About Us
-            </Button>
           </div>
         </div>
       </div>
