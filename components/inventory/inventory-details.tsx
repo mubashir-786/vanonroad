@@ -4,9 +4,20 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Users, Phone, Mail, ArrowLeft, Loader2, X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Calendar, MapPin, Users, ArrowLeft, Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import Link from 'next/link';
 import { getInventoryItem, InventoryItem } from '@/lib/api/inventory';
+import { createContactMessage } from '@/lib/api/contact';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,6 +38,15 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
   const [activeImage, setActiveImage] = useState(0);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   const [fullscreenImageIndex, setFullscreenImageIndex] = useState(0);
+  const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
+  const [enquiryLoading, setEnquiryLoading] = useState(false);
+  const [enquirySuccess, setEnquirySuccess] = useState('');
+  const [enquiryError, setEnquiryError] = useState('');
+  const [enquiryData, setEnquiryData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
 
   useEffect(() => {
     loadInventoryItem();
@@ -99,6 +119,37 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
       document.body.style.overflow = 'unset';
     };
   }, []);
+
+  const handleEnquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEnquiryLoading(true);
+    setEnquiryError('');
+    setEnquirySuccess('');
+
+    try {
+      await createContactMessage({
+        name: enquiryData.name,
+        email: enquiryData.email,
+        subject: `Enquiry about ${item?.title}`,
+        message: enquiryData.message
+      });
+      setEnquirySuccess('Your enquiry has been sent successfully! We will get back to you soon.');
+      setEnquiryData({ name: '', email: '', message: '' });
+      setTimeout(() => {
+        setIsEnquiryOpen(false);
+        setEnquirySuccess('');
+      }, 2000);
+    } catch (error: any) {
+      setEnquiryError(error.message || 'Failed to send enquiry. Please try again.');
+    } finally {
+      setEnquiryLoading(false);
+    }
+  };
+
+  const handleEnquiryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEnquiryData(prev => ({ ...prev, [name]: value }));
+  };
 
   if (loading) {
     return (
@@ -175,15 +226,9 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
             <img
               src={images[activeImage]}
               alt={`${item.title} - Main image`}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-cover"
               onClick={() => openFullscreen(activeImage)}
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-black/90 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
-                <ZoomIn className="h-4 w-4" />
-                Click to view full size
-              </div>
-            </div>
             {images.length > 1 && (
               <>
                 <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded text-sm">
@@ -307,13 +352,11 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">Contact</h2>
                 <div className="space-y-4">
-                  <Button className="w-full bg-amber-500 hover:bg-amber-600">
-                    <Phone className="mr-2 h-4 w-4" />
-                    Call Sales Team
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    <Mail className="mr-2 h-4 w-4" />
-                    Email Enquiry
+                  <Button 
+                    className="w-full bg-amber-500 hover:bg-amber-600"
+                    onClick={() => setIsEnquiryOpen(true)}
+                  >
+                    Enquiry
                   </Button>
                 </div>
               </CardContent>
@@ -413,6 +456,97 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
           </div>
         </div>
       )}
+
+      {/* Enquiry Dialog */}
+      <Dialog open={isEnquiryOpen} onOpenChange={setIsEnquiryOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Vehicle Enquiry</DialogTitle>
+          </DialogHeader>
+          
+          {enquirySuccess && (
+            <Alert className="border-green-200 bg-green-50 text-green-800">
+              <AlertDescription>{enquirySuccess}</AlertDescription>
+            </Alert>
+          )}
+
+          {enquiryError && (
+            <Alert variant="destructive">
+              <AlertDescription>{enquiryError}</AlertDescription>
+            </Alert>
+          )}
+
+          <form onSubmit={handleEnquirySubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="enquiry-name">Your Name</Label>
+              <Input
+                id="enquiry-name"
+                name="name"
+                type="text"
+                placeholder="John Doe"
+                value={enquiryData.name}
+                onChange={handleEnquiryChange}
+                required
+                disabled={enquiryLoading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="enquiry-email">Email Address</Label>
+              <Input
+                id="enquiry-email"
+                name="email"
+                type="email"
+                placeholder="john@example.com"
+                value={enquiryData.email}
+                onChange={handleEnquiryChange}
+                required
+                disabled={enquiryLoading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="enquiry-subject">Subject</Label>
+              <Input
+                id="enquiry-subject"
+                type="text"
+                value={`Enquiry about ${item.title}`}
+                disabled
+                className="bg-gray-50 dark:bg-gray-800"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="enquiry-message">Your Message</Label>
+              <Textarea
+                id="enquiry-message"
+                name="message"
+                placeholder="Tell us about your requirements..."
+                value={enquiryData.message}
+                onChange={handleEnquiryChange}
+                required
+                disabled={enquiryLoading}
+                className="min-h-[100px]"
+              />
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+              disabled={enquiryLoading}
+            >
+              {enquiryLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                'Send Enquiry'
+              )}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
