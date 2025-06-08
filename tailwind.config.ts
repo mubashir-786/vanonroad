@@ -62,8 +62,28 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],
-        playfair: ['var(--font-playfair)', 'serif'],
+        sans: [
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          '"Noto Sans"',
+          'sans-serif',
+          '"Apple Color Emoji"',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"',
+          '"Noto Color Emoji"'
+        ],
+        playfair: [
+          'Georgia',
+          'Cambria',
+          '"Times New Roman"',
+          'Times',
+          'serif'
+        ],
       },
       keyframes: {
         'accordion-down': {
