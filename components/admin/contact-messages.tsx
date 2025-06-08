@@ -154,6 +154,7 @@ export function ContactMessages() {
               <TableHead>Status</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
               <TableHead>Subject</TableHead>
               <TableHead>Date</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -162,7 +163,7 @@ export function ContactMessages() {
           <TableBody>
             {messages.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   No messages found.
                 </TableCell>
               </TableRow>
@@ -176,6 +177,7 @@ export function ContactMessages() {
                   </TableCell>
                   <TableCell className="font-medium">{message.name}</TableCell>
                   <TableCell>{message.email}</TableCell>
+                  <TableCell>{message.phone}</TableCell>
                   <TableCell className="max-w-xs truncate">{message.subject}</TableCell>
                   <TableCell>{message.createdAt ? formatDate(message.createdAt) : 'N/A'}</TableCell>
                   <TableCell className="text-right">
@@ -193,6 +195,9 @@ export function ContactMessages() {
                           <div className="space-y-4">
                             <div>
                               <strong>Email:</strong> {message.email}
+                            </div>
+                            <div>
+                              <strong>Phone:</strong> {message.phone}
                             </div>
                             <div>
                               <strong>Subject:</strong> {message.subject}

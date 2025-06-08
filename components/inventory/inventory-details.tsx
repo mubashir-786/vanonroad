@@ -45,6 +45,7 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
   const [enquiryData, setEnquiryData] = useState({
     name: '',
     email: '',
+    phone: '',
     message: ''
   });
 
@@ -130,11 +131,12 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
       await createContactMessage({
         name: enquiryData.name,
         email: enquiryData.email,
+        phone: enquiryData.phone,
         subject: `Enquiry about ${item?.title}`,
         message: enquiryData.message
       });
       setEnquirySuccess('Your enquiry has been sent successfully! We will get back to you soon.');
-      setEnquiryData({ name: '', email: '', message: '' });
+      setEnquiryData({ name: '', email: '', phone: '', message: '' });
       setTimeout(() => {
         setIsEnquiryOpen(false);
         setEnquirySuccess('');
@@ -499,6 +501,20 @@ export function InventoryDetails({ id }: InventoryDetailsProps) {
                 type="email"
                 placeholder="john@example.com"
                 value={enquiryData.email}
+                onChange={handleEnquiryChange}
+                required
+                disabled={enquiryLoading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="enquiry-phone">Phone Number</Label>
+              <Input
+                id="enquiry-phone"
+                name="phone"
+                type="tel"
+                placeholder="+44 1234 567890"
+                value={enquiryData.phone}
                 onChange={handleEnquiryChange}
                 required
                 disabled={enquiryLoading}

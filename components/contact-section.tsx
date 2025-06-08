@@ -7,12 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Clock,
-  Facebook,
-  Instagram,
   Mail,
   MapPin,
-  Twitter,
-  Youtube,
   Loader2
 } from "lucide-react";
 import { createContactMessage } from "@/lib/api/contact";
@@ -21,6 +17,7 @@ export function ContactSection() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     subject: '',
     message: ''
   });
@@ -42,7 +39,7 @@ export function ContactSection() {
     try {
       await createContactMessage(formData);
       setSuccess('Message sent successfully! We will get back to you soon.');
-      setFormData({ name: '', email: '', subject: '', message: '' });
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
     } catch (error: any) {
       setError(error.message || 'Failed to send message. Please try again.');
     } finally {
@@ -115,6 +112,23 @@ export function ContactSection() {
                     className="w-full"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium mb-2">
+                  Phone Number
+                </label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  placeholder="+44 1234 567890"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                  className="w-full"
+                />
               </div>
 
               <div>
@@ -209,24 +223,6 @@ export function ContactSection() {
                     Saturday: 10:00am - 4:00pm<br />
                     Sunday: Closed (Appointments Only)
                   </p>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-lg mb-3">Follow Us</h4>
-                <div className="flex space-x-4">
-                  <a href="#" className="bg-slate-200 dark:bg-slate-800 p-3 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
-                    <Facebook className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-                  </a>
-                  <a href="#" className="bg-slate-200 dark:bg-slate-800 p-3 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
-                    <Instagram className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-                  </a>
-                  <a href="#" className="bg-slate-200 dark:bg-slate-800 p-3 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
-                    <Twitter className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-                  </a>
-                  <a href="#" className="bg-slate-200 dark:bg-slate-800 p-3 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
-                    <Youtube className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-                  </a>
                 </div>
               </div>
             </div>
