@@ -58,8 +58,6 @@ export function Footer() {
               <li className="flex">
                 <MapPin className="h-5 w-5 mr-3 text-amber-500 flex-shrink-0" />
                 <span className="text-slate-300">
-                  123 Motorhome Way<br />
-                  Industrial Estate<br />
                   Yorkshire, UK<br />
                   YO12 3AB
                 </span>
