@@ -11,7 +11,6 @@ import {
   Instagram,
   Mail,
   MapPin,
-  Phone,
   Twitter,
   Youtube,
   Loader2
@@ -190,26 +189,13 @@ export function ContactSection() {
 
               <div className="flex items-start">
                 <div className="mr-4 mt-1 bg-amber-100 dark:bg-amber-900/30 p-2 rounded-lg">
-                  <Phone className="h-5 w-5 text-amber-600" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-lg mb-1">Phone</h4>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    Sales: +44 (0) 1234 567 890<br />
-                    Service: +44 (0) 1234 567 891
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="mr-4 mt-1 bg-amber-100 dark:bg-amber-900/30 p-2 rounded-lg">
                   <Mail className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
                   <h4 className="font-bold text-lg mb-1">Email</h4>
                   <p className="text-slate-600 dark:text-slate-400">
-                    Sales: sales@vanonroad.com<br />
-                    Service: service@vanonroad.com
+                    Sales: joshuamontevalde@gmail.com<br />
+                    Service: alinapopa9629@gmail.com
                   </p>
                 </div>
               </div>

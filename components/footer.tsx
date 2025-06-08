@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { MapPin, Phone, Mail } from 'lucide-react';
+import { MapPin, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 export function Footer() {
@@ -37,7 +37,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick Links - Updated to match header */}
+          {/* Quick Links */}
           <div>
             <h4 className="font-bold text-lg mb-6">Quick Links</h4>
             <ul className="space-y-4">
@@ -65,12 +65,11 @@ export function Footer() {
                 </span>
               </li>
               <li className="flex">
-                <Phone className="h-5 w-5 mr-3 text-amber-500 flex-shrink-0" />
-                <span className="text-slate-300">+44 (0) 1234 567 890</span>
-              </li>
-              <li className="flex">
                 <Mail className="h-5 w-5 mr-3 text-amber-500 flex-shrink-0" />
-                <span className="text-slate-300">info@vanonroad.com</span>
+                <div className="text-slate-300">
+                  <div>joshuamontevalde@gmail.com</div>
+                  <div>alinapopa9629@gmail.com</div>
+                </div>
               </li>
             </ul>
           </div>
