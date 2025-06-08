@@ -9,6 +9,9 @@ const nextConfig = {
   },
   experimental: {
     esmExternals: false,
+    fontLoaders: [
+      { loader: '@next/font/google', options: { subsets: ['latin'] } },
+    ],
   },
   webpack: (config, { isServer }) => {
     // Disable webpack cache to prevent caching issues
