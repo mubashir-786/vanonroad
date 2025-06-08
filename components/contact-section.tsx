@@ -179,8 +179,6 @@ export function ContactSection() {
                 <div>
                   <h4 className="font-bold text-lg mb-1">Our Showroom</h4>
                   <p className="text-slate-600 dark:text-slate-400">
-                    123 Motorhome Way<br />
-                    Industrial Estate<br />
                     Yorkshire, UK<br />
                     YO12 3AB
                   </p>
